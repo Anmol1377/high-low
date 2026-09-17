@@ -1,7 +1,15 @@
 # High Low Casino
 
 HTML5 implementation of the GDD v2.3 spec. No build step, no dependencies, no
-server — open `index.html` (or serve the folder) and it runs.
+server — serve the folder and it runs.
+
+**Live:** https://anmol1377.github.io/high-low/high-low-casino/ ·
+Project overview: [`../README.md`](../README.md) ·
+Full context: [`../context/CONTEXT.md`](../context/CONTEXT.md)
+
+```sh
+python3 -m http.server 8765   # then open http://localhost:8765
+```
 
 ## Files
 
@@ -19,6 +27,7 @@ Matches the architecture in GDD §24.1.
 | `telemetry.js` | Chunked idempotent outbox (IndexedDB → localStorage → memory) |
 | `service-worker.js` | Versioned offline cache |
 | `test.js` | 29 headless checks — `node test.js` |
+| `manifest.webmanifest`, `icon.svg` | Web app manifest and icon |
 
 `../ev_check.py` re-derives the economy from first principles and reads the live
 table out of `config.js`.
@@ -38,7 +47,7 @@ genuine choice rather than a solved one.
 After any change to `MULTIPLIERS`, run both:
 
 ```sh
-node test.js          # rules, economy, meta systems, 10k simulated runs
+node test.js          # rules, economy, meta systems, 20,000 seeded simulated runs
 python3 ../ev_check.py
 ```
 
@@ -48,9 +57,11 @@ cannot feed a content-gated album). See GDD §11.1.
 
 ## Publishing (GitHub Pages)
 
-Static files with relative paths, so it runs as-is from
-`https://<user>.github.io/<repo>/`. HTTPS is what makes Copy link, native
-image sharing and install-to-home-screen work.
+Static files with relative paths, so it runs from any subpath. Pushing to
+`main` publishes it. With **Settings → Pages → Source: GitHub Actions**, the
+workflow in `.github/workflows/deploy-pages.yml` runs `test.js` and
+`ev_check.py` first and deploys only this folder when both pass. HTTPS is what
+makes Copy link and native image sharing work.
 
 **Things to know once it's live**
 
@@ -75,4 +86,5 @@ Server-side anything. Scores, the economy and challenge codes are all
 client-authoritative and trivially editable — fine offline, but leagues,
 verified challenges and any competitive reward need the Phase 3 backend first.
 Telemetry queues and exports locally; automatic upload needs the Apps Script
-web-app URL in `CONFIG.TELEMETRY.endpoint` (GDD §23.5).
+web-app URL in `CONFIG.TELEMETRY.endpoint` (GDD §23.5). The sound and haptics
+toggles in Settings exist, but no audio or vibration is implemented yet.
