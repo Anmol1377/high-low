@@ -3,7 +3,7 @@
 A one-thumb card prediction game. Call whether the next card is **higher** or
 **lower**, build a streak, and cash out before it breaks.
 
-**▶ Play:** https://anmol1377.github.io/high-low/high-low-casino/
+**▶ Play:** https://anmol1377.github.io/high-low/
 
 Plain HTML, CSS and JavaScript — no build step, no dependencies, no server.
 Works on phone and desktop, and offline after the first load.
@@ -82,17 +82,24 @@ Both must pass after any change to `config.js`.
 
 ## Deployment
 
-Pushing to `main` publishes the site through GitHub Pages.
+Every push to `main` runs
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml):
+
+1. **test** — `node test.js` and `python3 ev_check.py`
+2. **deploy** — publishes only the `high-low-casino/` folder to GitHub Pages,
+   and only if the tests passed
+
+A push that fails the tests never goes live. The design documents and `context/`
+stay in the repository and are not served on the site.
 
 **Releasing an update:** bump `BUILD` in `high-low-casino/config.js` and `CACHE`
 in `high-low-casino/service-worker.js` for **every** change, or returning
 players keep the old cached version. After a bump, the update appears on a
 player's second visit.
 
-The workflow in `.github/workflows/deploy-pages.yml` runs the tests and deploys
-only the `high-low-casino/` folder if they pass. It applies when the repository's
-**Settings → Pages → Source** is set to **GitHub Actions**; the game is then
-served at `https://anmol1377.github.io/high-low/`.
+This relies on **Settings → Pages → Source** being set to **GitHub Actions**.
+Switching it to "Deploy from a branch" would bypass the tests and serve the
+whole repository instead.
 
 ---
 

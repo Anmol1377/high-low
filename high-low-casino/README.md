@@ -3,7 +3,7 @@
 HTML5 implementation of the GDD v2.3 spec. No build step, no dependencies, no
 server — serve the folder and it runs.
 
-**Live:** https://anmol1377.github.io/high-low/high-low-casino/ ·
+**Live:** https://anmol1377.github.io/high-low/ ·
 Project overview: [`../README.md`](../README.md) ·
 Full context: [`../context/CONTEXT.md`](../context/CONTEXT.md)
 
@@ -57,10 +57,10 @@ cannot feed a content-gated album). See GDD §11.1.
 
 ## Publishing (GitHub Pages)
 
-Static files with relative paths, so it runs from any subpath. Pushing to
-`main` publishes it. With **Settings → Pages → Source: GitHub Actions**, the
-workflow in `.github/workflows/deploy-pages.yml` runs `test.js` and
-`ev_check.py` first and deploys only this folder when both pass. HTTPS is what
+Static files with relative paths, so it runs from any subpath. Every push to
+`main` runs `.github/workflows/deploy-pages.yml`: `test.js` and `ev_check.py`
+first, then this folder is deployed to https://anmol1377.github.io/high-low/
+only if both pass (Pages source: GitHub Actions). HTTPS is what
 makes Copy link and native image sharing work.
 
 **Things to know once it's live**
