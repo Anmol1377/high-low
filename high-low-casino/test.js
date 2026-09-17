@@ -184,9 +184,19 @@ ok("league tier thresholds match GDD 15.2", () => {
   assert.strictEqual(H.leagueOf(100).name, "Diamond");
 });
 
-console.log("\nLIVE RUNS (10,000 simulated, optimal play, cash out at streak 5)");
+/* The simulation is seeded so it gives the same answer on every machine and
+   every CI run - an unseeded 10k-run sample missed a hand-picked 92-98% band
+   about 1 run in 10, which failed a deploy for no reason. The band is derived
+   from the curve itself: expected return +/- 4 standard errors, so it follows
+   any retune. This checks the GAME CODE pays what the curve says; a badly
+   solved curve (like the 10/13 one) is caught by the EV spread check above. */
+const RUNS = 20000, STOP = 5;
+const realCrypto = global.window.crypto;
+const seeded = G.mulberry32(0xC0FFEE);
+global.window.crypto = {getRandomValues(a) { for (let i = 0; i < a.length; i++) a[i] = Math.floor(seeded() * 256); return a; }};
+console.log(`\nLIVE RUNS (${RUNS.toLocaleString()} seeded runs, optimal play, cash out at streak ${STOP})`);
 let banked = 0, staked = 0, runs = 0;
-for (let i = 0; i < 10000; i++) {
+for (let i = 0; i < RUNS; i++) {
   save.chips = 1e9;
   if (!G.start("classic", 100)) break;
   staked += 100; runs++;
@@ -194,18 +204,22 @@ for (let i = 0; i < 10000; i++) {
   while (G.run() && !G.run().settled && guard++ < 200) {
     const s = G.snapshot();
     if (!s) break;
-    if (s.streak >= 5) { const before = save.chips; G.cashOut(false); banked += save.chips - before; break; }
+    if (s.streak >= STOP) { const before = save.chips; G.cashOut(false); banked += save.chips - before; break; }
     G.predict(s.pHigher >= s.pLower ? "hi" : "lo");
   }
   if (G.run()) G.finish("test");
 }
-ok(runs === 10000 && `${runs} runs completed without a stuck state`, () => assert.strictEqual(runs, 10000));
+global.window.crypto = realCrypto;
+ok(`${RUNS} runs completed without a stuck state`, () => assert.strictEqual(runs, RUNS));
+const pReach = REACH[STOP - 1], pay = C.MULTIPLIERS[STOP - 1];
+const expected = pReach * pay;
+const se = Math.sqrt(pReach * pay * pay - expected * expected) / Math.sqrt(RUNS);
 const rtp = banked / staked;
-console.log(`  → return to player: ${(rtp * 100).toFixed(1)}%  (designed ~95%, chance ±2%)`);
-ok("measured RTP lands near the designed house edge", () => {
-  assert(rtp > 0.92 && rtp < 0.98, "RTP " + rtp.toFixed(3) + " is off the designed curve");
+console.log(`  \u2192 return to player: ${(rtp * 100).toFixed(1)}%  (designed ${(expected * 100).toFixed(1)}%, pass band \u00b1${(4 * se * 100).toFixed(1)}%)`);
+ok("measured RTP lands within 4 standard errors of the designed curve", () => {
+  assert(Math.abs(rtp - expected) <= 4 * se,
+    `RTP ${(rtp * 100).toFixed(1)}% vs designed ${(expected * 100).toFixed(1)}% \u00b1${(4 * se * 100).toFixed(1)}%`);
 });
-
 
 /* ---- regressions found by actually playing the build ---- */
 console.log("REGRESSIONS");

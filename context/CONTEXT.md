@@ -321,6 +321,7 @@ gameplay input.
 | Challenge had no ghost or winner; score was trusted from the code | User question | Ghost timeline and score rebuilt from calls; head-to-head result |
 | Play Again after a challenge switched to the Daily deck | User question | Play Again replays the exact last start; fixed modes aren't remembered |
 | Copy link produced `null/...` on a local file | User question | Uses the page URL; on `file://` it says to send the code instead |
+| RTP simulation test failed ~1 run in 10 and blocked the first Pages deploy | GitHub Actions failure | Seeded simulation (identical every run); pass band = designed return ±4 standard errors |
 | Flaky timer regression test | Re-verification | Retry until a call survives; assert real elapsed ticks |
 
 ---
