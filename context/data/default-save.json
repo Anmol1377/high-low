@@ -1,0 +1,81 @@
+{
+  "v": 1,
+  "build": "2.3.2",
+  "chips": 2500,
+  "xp": 0,
+  "level": 1,
+  "name": "Player",
+  "skin": "neon",
+  "wager": 10,
+  "mode": "rush",
+  "stats": {
+    "best": 0,
+    "runs": 0,
+    "correct": 0,
+    "wrong": 0,
+    "ties": 0,
+    "predictions": 0,
+    "maxBank": 0,
+    "banked": 0
+  },
+  "achievements": {},
+  "inventory": {
+    "time": 2,
+    "shield": 2,
+    "auto": 2,
+    "xp2": 2,
+    "mission": 2,
+    "key": 2
+  },
+  "loadout": {},
+  "owned": {
+    "avatar:fox": true,
+    "frame:electric": true,
+    "title:fresh": true,
+    "emote:gg": true
+  },
+  "equipped": {
+    "avatar": "fox",
+    "frame": "electric",
+    "title": "fresh",
+    "emote": "gg"
+  },
+  "skins": {
+    "neon": true
+  },
+  "missions": {
+    "day": "",
+    "picks": [],
+    "progress": {},
+    "claimed": {}
+  },
+  "login": {
+    "day": 0,
+    "last": ""
+  },
+  "drop": 0,
+  "comeback": "",
+  "lastSeen": "",
+  "weekly": {
+    "week": "",
+    "calls": 0,
+    "badge": false,
+    "best": 0,
+    "settled": ""
+  },
+  "season": {
+    "month": "",
+    "points": 0,
+    "claimed": []
+  },
+  "board": null,
+  "league": null,
+  "personalBest": {},
+  "challengeBest": {},
+  "settings": {
+    "sound": true,
+    "motion": true,
+    "haptics": true
+  },
+  "history": []
+}

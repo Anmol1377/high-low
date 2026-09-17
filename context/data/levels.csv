@@ -1,0 +1,51 @@
+level,total_xp,xp_to_next,rank
+1,0,80,Beginner
+2,80,108,Beginner
+3,188,136,Beginner
+4,324,164,Beginner
+5,488,192,Player
+6,680,220,Player
+7,900,248,Player
+8,1148,276,Player
+9,1424,304,Player
+10,1728,332,Risk Taker
+11,2060,360,Risk Taker
+12,2420,388,Risk Taker
+13,2808,416,Risk Taker
+14,3224,444,Risk Taker
+15,3668,472,Risk Taker
+16,4140,500,Risk Taker
+17,4640,528,Risk Taker
+18,5168,556,Card Expert
+19,5724,584,Card Expert
+20,6308,612,Card Expert
+21,6920,640,Card Expert
+22,7560,668,Card Expert
+23,8228,696,Card Expert
+24,8924,724,Card Expert
+25,9648,752,Card Expert
+26,10400,780,Card Expert
+27,11180,808,High Roller
+28,11988,836,High Roller
+29,12824,864,High Roller
+30,13688,892,High Roller
+31,14580,920,High Roller
+32,15500,948,High Roller
+33,16448,976,High Roller
+34,17424,1004,High Roller
+35,18428,1032,High Roller
+36,19460,1060,High Roller
+37,20520,1088,High Roller
+38,21608,1116,Casino Master
+39,22724,1144,Casino Master
+40,23868,1172,Casino Master
+41,25040,1200,Casino Master
+42,26240,1228,Casino Master
+43,27468,1256,Casino Master
+44,28724,1284,Casino Master
+45,30008,1312,Casino Master
+46,31320,1340,Casino Master
+47,32660,1368,Casino Master
+48,34028,1396,Casino Master
+49,35424,1424,Casino Master
+50,36848,max,Prediction Legend

@@ -1,0 +1,169 @@
+/* =============================================================================
+   styles.css - core presentation. GDD v2.3 section 18.1.
+   Dark navy table, cyan / violet / pink / gold accents, glass panels.
+   Card fronts keep consistent contrast and rank readability whatever the skin.
+   ============================================================================= */
+:root{
+  --bg:#080b1d; --bg2:#0e1435;
+  --panel:rgba(255,255,255,.055); --line:rgba(255,255,255,.12);
+  --ink:#eef1ff; --dim:#9aa3cc;
+  --cyan:#22d3ee; --violet:#a78bfa; --pink:#f472b6; --gold:#fbbf24;
+  --win:#34d399; --lose:#fb7185;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --accent:var(--cyan);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  background:radial-gradient(130% 80% at 50% 0%,var(--bg2) 0%,var(--bg) 60%) fixed var(--bg);
+  color:var(--ink);
+  font:15px/1.5 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex;justify-content:center;
+  padding:var(--safe-t) 16px calc(var(--safe-b) + 20px);
+  overscroll-behavior-y:none;
+}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:10px}
+h2{margin:2px 0 0;font-size:21px;letter-spacing:-.01em}
+h3{margin:0;font-size:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Never rely on motion alone to carry a result. GDD 19. */
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body.nomotion *{animation:none!important;transition:none!important}
+
+.wrap{width:100%;max-width:440px;display:flex;flex-direction:column;gap:14px;padding-block:12px}
+.screen{display:flex;flex-direction:column;gap:12px;flex:1}
+
+/* ---------------- top bar ---------------- */
+.topbar{position:sticky;top:var(--safe-t);z-index:5;background:linear-gradient(180deg,var(--bg) 70%,transparent);padding-bottom:6px}
+.bar{display:flex;align-items:center;gap:11px}
+.idbtn{padding:0;border-radius:50%}
+.ava{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;font-size:21px;
+  background:rgba(255,255,255,.07);border:2px solid var(--accent)}
+.who b{display:block;font-size:14px;line-height:1.15}
+.who span{font-size:11px;color:var(--dim)}
+.chips{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;color:var(--gold);font-size:18px;font-weight:700;line-height:1.1}
+.chips small{display:block;color:var(--dim);font-weight:500;font-size:9px;letter-spacing:.12em}
+.xpbar{height:4px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.xpbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:width .45s}
+
+/* ---------------- panels + type ---------------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;backdrop-filter:blur(12px)}
+.hero h1{margin:0;font-size:34px;letter-spacing:-.025em;line-height:1.02}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:7px 0 0;color:var(--dim);font-size:13px}
+.note{font-size:11px;color:var(--dim);text-align:center;margin:0}
+.legend{font-size:11px;color:var(--dim);text-align:center;margin:0;letter-spacing:.03em}
+label.h,.h{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);margin:0 0 9px}
+
+/* ---------------- buttons ---------------- */
+.big{width:100%;padding:17px;border-radius:16px;font-size:18px;font-weight:800;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));color:#071026;
+  box-shadow:0 8px 26px -9px var(--cyan);transition:transform .12s,box-shadow .12s}
+.big:active:not(:disabled){transform:translateY(2px);box-shadow:0 4px 14px -9px var(--cyan)}
+.big:disabled{opacity:.4;box-shadow:none}
+.ghost{width:100%;padding:13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:600}
+.ghost:active:not(:disabled){background:rgba(255,255,255,.09)}
+.ghost:disabled{opacity:.35}
+.ghost.gold{border-color:var(--gold);color:var(--gold)}
+.tiny{padding:9px 13px;border-radius:11px;border:1px solid var(--line);font-size:12px;color:var(--dim);flex:1}
+.tiny:active:not(:disabled){background:rgba(255,255,255,.08)}
+.tiny:disabled{opacity:.35}
+.row{display:flex;gap:10px}.row>*{flex:1}
+
+.chipset{display:flex;flex-wrap:wrap;gap:7px}
+.chipset button{padding:8px 13px;border-radius:99px;border:1px solid var(--line);font-size:13px;
+  font-weight:600;font-variant-numeric:tabular-nums;color:var(--dim)}
+.chipset button[aria-pressed=true]{background:var(--ink);color:#0a0f28;border-color:var(--ink)}
+.chipset button:disabled{opacity:.3}
+.input{width:100%;padding:11px 13px;border-radius:12px;background:rgba(0,0,0,.3);
+  border:1px solid var(--line);color:var(--ink);font:inherit}
+.input.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;resize:vertical;word-break:break-all}
+
+/* ---------------- gameplay HUD ---------------- */
+.hudpanel{padding:12px}
+.hud{display:flex;text-align:center;gap:8px}
+.hud div{flex:1}
+.hud b{display:block;font-size:19px;font-variant-numeric:tabular-nums;line-height:1.2}
+.hud span{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hud .mult b{color:var(--violet)}
+.hud .out b{color:var(--gold)}
+.timer{height:5px;margin-top:11px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--pink));transition:width .1s linear}
+.timer.low i{background:var(--lose)}
+
+/* ---------------- cards ---------------- */
+.felt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:13px;min-height:210px;touch-action:pan-y}
+.cards{display:flex;gap:14px;align-items:center;perspective:900px}
+.card{width:104px;height:146px;border-radius:14px;display:flex;flex-direction:column;justify-content:space-between;
+  padding:10px;background:linear-gradient(160deg,#fff,#dfe5f7);color:#111a3a;font-weight:800;
+  box-shadow:0 14px 34px -12px #000,inset 0 0 0 1px rgba(255,255,255,.7);transition:transform .3s}
+.card .r{font-size:31px;line-height:1}
+.card .s{font-size:26px;text-align:right}
+.card.red{color:#c42a52}
+.card.back{background:linear-gradient(135deg,var(--violet),var(--cyan));
+  box-shadow:0 14px 34px -12px #000,inset 0 0 0 1px rgba(255,255,255,.35);align-items:center;justify-content:center}
+.card.back::after{content:"?";font-size:42px;color:rgba(255,255,255,.65)}
+.card.flip{animation:flip .43s ease}
+@keyframes flip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg) scale(1.06)}100%{transform:rotateY(0)}}
+.card.win{animation:pop .42s ease}
+@keyframes pop{50%{transform:translateY(-10px) scale(1.06)}}
+.card.bad{animation:shake .42s ease}
+@keyframes shake{25%{transform:translateX(-9px) rotate(-2deg)}75%{transform:translateX(9px) rotate(2deg)}}
+.vs{color:var(--dim);font-size:10px;letter-spacing:.16em}
+
+.odds{display:flex;gap:6px;font-size:10px;text-align:center;letter-spacing:.06em}
+.odds div{flex:1;padding:7px 4px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--dim)}
+.odds b{display:block;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}
+
+.calls{display:flex;gap:10px}
+.calls button{flex:1;padding:16px 8px;border-radius:16px;font-weight:800;font-size:16px;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);transition:transform .12s}
+.calls button .ar{display:block;font-size:23px;line-height:1.1}
+.calls .hi{background:linear-gradient(160deg,rgba(52,211,153,.24),rgba(52,211,153,.06));border-color:rgba(52,211,153,.45)}
+.calls .lo{background:linear-gradient(160deg,rgba(251,113,133,.24),rgba(251,113,133,.06));border-color:rgba(251,113,133,.45)}
+.calls button:active:not(:disabled){transform:translateY(2px)}
+.calls button:disabled{opacity:.26;filter:grayscale(1)}
+
+/* ---------------- result ---------------- */
+.result{text-align:center}
+.big-n{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.05;margin:4px 0}
+.tag{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px}
+.stats div{background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px}
+.stats span{color:var(--dim)}
+.stats b{font-variant-numeric:tabular-nums}
+
+/* ---------------- leaderboard ---------------- */
+.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;counter-reset:p}
+.board li{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.05);font-size:13px}
+.board li::before{counter-increment:p;content:counter(p);width:20px;color:var(--dim);font-variant-numeric:tabular-nums}
+.board li.you{border:1px solid var(--accent)}
+.board .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .sc{font-variant-numeric:tabular-nums;color:var(--gold)}
+
+/* ---------------- modals ---------------- */
+.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;
+  background:rgba(4,6,20,.78);backdrop-filter:blur(6px);animation:fade .2s ease}
+@keyframes fade{from{opacity:0}}
+.sheet{width:100%;max-width:400px;max-height:88vh;overflow:auto;display:flex;flex-direction:column;gap:12px;
+  padding:20px;border-radius:22px;background:#111842;border:1px solid var(--line);text-align:center;
+  animation:rise .24s ease}
+@keyframes rise{from{transform:translateY(18px);opacity:0}}
+.sheet .h{text-align:left}
+.chesticon{font-size:52px}
+.sharecanvas{width:100%;max-width:210px;margin:0 auto;border-radius:12px;border:1px solid var(--line);aspect-ratio:9/16}
+
+/* ---------------- toasts ---------------- */
+.toaster{position:fixed;left:50%;top:calc(var(--safe-t) + 12px);transform:translateX(-50%);
+  z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{padding:10px 18px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap;
+  background:#101740;border:1px solid var(--line);box-shadow:0 10px 30px -10px #000;animation:drop .25s ease}
+@keyframes drop{from{opacity:0;transform:translateY(-12px)}}
+.toast.good{border-color:var(--win);color:var(--win)}
+.toast.gold{border-color:var(--gold);color:var(--gold)}
+.toast.bad{border-color:var(--lose);color:var(--lose)}

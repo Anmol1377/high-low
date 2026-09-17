@@ -1,0 +1,14 @@
+{
+  "name": "High Low Casino",
+  "short_name": "High Low",
+  "description": "Call the next card higher or lower. Virtual chips only.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080b1d",
+  "theme_color": "#080b1d",
+  "categories": ["games"],
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

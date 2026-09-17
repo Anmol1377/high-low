@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#080b1d">
+<title>High Low Casino</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="hybrid.css">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== persistent top bar ===================== -->
+  <header class="topbar">
+    <div class="bar">
+      <button class="idbtn" id="open-profile" aria-label="Profile">
+        <span class="ava" id="bar-ava">🦊</span>
+      </button>
+      <div class="who">
+        <b id="bar-rank">Beginner</b>
+        <span>Lv <i id="bar-level">1</i> · <i id="bar-title">Fresh Deck</i></span>
+      </div>
+      <div class="chips"><span id="bar-chips">0</span><small>CHIPS</small></div>
+    </div>
+    <div class="xpbar"><i id="bar-xp"></i></div>
+  </header>
+
+  <!-- ===================== menu ===================== -->
+  <section id="s-menu" class="screen">
+    <div class="hero">
+      <h1>High <em>Low</em></h1>
+      <p class="sub">Call the next card higher or lower. Bank it before it breaks.</p>
+    </div>
+
+    <button class="big" id="btn-quick">Quick Play</button>
+
+    <div class="row">
+      <button class="ghost" id="btn-daily">Daily 60s</button>
+      <button class="ghost" id="btn-custom">Custom Play</button>
+    </div>
+    <button class="ghost" id="btn-weekend" hidden>⚡ Weekend Sprint</button>
+
+    <div class="row">
+      <button class="ghost" id="btn-hub">Player Hub</button>
+      <button class="ghost" id="btn-board">Leaderboard</button>
+    </div>
+
+    <div class="panel claims" id="claims"></div>
+
+    <div class="panel">
+      <label class="h">Today's missions</label>
+      <div id="menu-missions" class="missions"></div>
+    </div>
+
+    <p class="note">Virtual chips only · no real-money value or redemption</p>
+  </section>
+
+  <!-- ===================== custom play ===================== -->
+  <section id="s-custom" class="screen" hidden>
+    <h2>Custom Play</h2>
+    <div class="panel">
+      <label class="h">Mode</label>
+      <div class="chipset" id="pick-mode" role="group" aria-label="Mode"></div>
+    </div>
+    <div class="panel">
+      <label class="h">Wager</label>
+      <div class="chipset" id="pick-wager" role="group" aria-label="Wager"></div>
+    </div>
+    <div class="panel">
+      <label class="h">Card skin</label>
+      <div class="chipset" id="pick-skin" role="group" aria-label="Card skin"></div>
+    </div>
+    <div class="panel">
+      <label class="h">Boosters for this run</label>
+      <div id="pick-boost" class="boosters"></div>
+    </div>
+    <button class="big" id="btn-deal">Deal</button>
+    <button class="ghost" id="custom-back">Back</button>
+  </section>
+
+  <!-- ===================== gameplay ===================== -->
+  <section id="s-game" class="screen" hidden>
+    <div class="panel hudpanel">
+      <div class="hud">
+        <div><b id="h-wager">0</b><span>Wager</span></div>
+        <div class="mult"><b id="h-mult">—</b><span>Streak <i id="h-streak">0</i></span></div>
+        <div class="out"><b id="h-out">0</b><span>Cash out</span></div>
+      </div>
+      <div class="timer" id="timerwrap" hidden><i id="timerfill"></i></div>
+    </div>
+
+    <div class="byte" id="byte"><span id="byte-face">🤖</span><b id="byte-say">Let's go</b></div>
+
+    <div class="felt" id="felt">
+      <div class="cards">
+        <div class="card" id="card-now"><div class="r">?</div><div class="s"></div></div>
+        <div class="vs">NEXT</div>
+        <div class="card back" id="card-next" aria-hidden="true"></div>
+      </div>
+      <p class="legend" id="fairlabel">Independent draw · 13 ranks, replaced every deal</p>
+    </div>
+
+    <div class="odds" aria-label="Next draw probability">
+      <div>HIGHER<b id="o-hi">0%</b></div>
+      <div>TIE<b id="o-tie">8%</b></div>
+      <div>LOWER<b id="o-lo">0%</b></div>
+    </div>
+
+    <div class="calls">
+      <button class="hi" id="btn-hi"><span class="ar" aria-hidden="true">▲</span>Higher</button>
+      <button class="lo" id="btn-lo"><span class="ar" aria-hidden="true">▼</span>Lower</button>
+    </div>
+    <div class="row">
+      <button class="ghost" id="btn-insure">Protect</button>
+      <button class="ghost gold" id="btn-cash">Cash Out</button>
+    </div>
+    <div class="row">
+      <button class="tiny" id="btn-time" hidden>+3s</button>
+      <button class="tiny" id="btn-emote">👏</button>
+      <button class="tiny" id="btn-quit">Quit</button>
+    </div>
+    <p class="legend">Swipe ▲ ▼ to call · swipe ▶ to bank · keys ↑ ↓ C</p>
+  </section>
+
+  <!-- ===================== result ===================== -->
+  <section id="s-over" class="screen" hidden>
+    <div class="panel result">
+      <div class="tag" id="r-tag">Run over</div>
+      <div class="big-n" id="r-amt">0</div>
+      <div class="tag" id="r-sub">chips banked</div>
+    </div>
+    <div class="stats">
+      <div><span>Streak</span><b id="r-streak">0</b></div>
+      <div><span>Multiplier</span><b id="r-mult">—</b></div>
+      <div><span>XP earned</span><b id="r-xp">0</b></div>
+      <div><span>Net</span><b id="r-net">0</b></div>
+    </div>
+    <button class="big" id="btn-again">Play Again</button>
+    <div class="row">
+      <button class="ghost" id="btn-share">Share result</button>
+      <button class="ghost" id="btn-challenge">Challenge a friend</button>
+    </div>
+    <button class="ghost" id="btn-home">Menu</button>
+  </section>
+
+  <!-- ===================== player hub ===================== -->
+  <section id="s-hub" class="screen" hidden>
+    <h2>Player Hub</h2>
+    <nav class="tabs" id="hub-tabs" role="tablist"></nav>
+    <div id="hub-body" class="hubbody"></div>
+    <button class="ghost" id="hub-back">Back</button>
+  </section>
+
+  <!-- ===================== profile ===================== -->
+  <section id="s-profile" class="screen" hidden>
+    <h2>Profile</h2>
+    <div class="panel idcard" id="idcard"></div>
+    <div class="panel"><label class="h">Statistics</label><div class="stats" id="prof-stats"></div></div>
+    <div class="panel"><label class="h">Achievements</label><div id="prof-badges" class="badges"></div></div>
+    <button class="ghost" id="profile-back">Back</button>
+  </section>
+
+  <!-- ===================== leaderboard ===================== -->
+  <section id="s-board" class="screen" hidden>
+    <h2>Leaderboard</h2>
+    <div class="panel">
+      <label class="h" for="name-in">Display name</label>
+      <input id="name-in" maxlength="16" class="input" autocomplete="off">
+    </div>
+    <div class="panel"><label class="h">All time · this browser</label><ol id="board-list" class="board"></ol></div>
+    <p class="note">Your best banked runs on this browser</p>
+    <button class="ghost" id="board-back">Back</button>
+  </section>
+
+  <!-- ===================== modals ===================== -->
+  <div class="modal" id="m-chest" hidden role="dialog" aria-modal="true" aria-labelledby="chest-h">
+    <div class="sheet">
+      <div class="chesticon" id="chest-icon">🎁</div>
+      <h3 id="chest-h">Streak chest</h3>
+      <p class="big-n" id="chest-xp">+0 XP</p>
+      <p class="note" id="chest-note"></p>
+      <button class="big" id="chest-ok">Collect</button>
+    </div>
+  </div>
+
+  <div class="modal" id="m-share" hidden role="dialog" aria-modal="true" aria-labelledby="share-h">
+    <div class="sheet">
+      <h3 id="share-h">Share your run</h3>
+      <canvas id="share-canvas" width="1080" height="1920" class="sharecanvas"></canvas>
+      <div class="row">
+        <button class="ghost" id="share-native">Share</button>
+        <button class="ghost" id="share-dl">Download</button>
+      </div>
+      <div class="row">
+        <button class="tiny" id="share-wa">WhatsApp</button>
+        <button class="tiny" id="share-tg">Telegram</button>
+        <button class="tiny" id="share-x">X</button>
+        <button class="tiny" id="share-copy">Copy text</button>
+      </div>
+      <button class="ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <div class="modal" id="m-challenge" hidden role="dialog" aria-modal="true" aria-labelledby="ch-h">
+    <div class="sheet">
+      <h3 id="ch-h">Friend challenge</h3>
+      <label class="h">Your code</label>
+      <textarea id="ch-out" class="input code" rows="3" readonly></textarea>
+      <div class="row">
+        <button class="tiny" id="ch-copy">Copy code</button>
+        <button class="tiny" id="ch-link">Copy link</button>
+      </div>
+      <label class="h">Play a friend's code</label>
+      <textarea id="ch-in" class="input code" rows="3" placeholder="Paste an HL1 code"></textarea>
+      <p class="note" id="ch-msg">Fixed replay · practice only, no chips at risk</p>
+      <button class="big" id="ch-play">Play this challenge</button>
+      <button class="ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <div class="toaster" id="toaster" aria-live="polite"></div>
+  <p class="sr" id="say" role="status" aria-live="polite"></p>
+</div>
+
+<script src="config.js"></script>
+<script src="telemetry.js"></script>
+<script src="game.js"></script>
+<script src="hybrid-model.js"></script>
+<script src="hybrid-ui.js"></script>
+</body>
+</html>
