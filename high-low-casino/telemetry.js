@@ -118,20 +118,34 @@ async function log(evt, data) {
 }
 
 /* ---------------------------------------------------------------- deliver -- */
+/* Served by Apps Script? Then the page can call the collector directly and no
+   endpoint or CORS is involved. A browser on ordinary hosting cannot post to
+   Apps Script at all, which is why GDD 23.5 limits auto-upload to the /exec
+   URL - there it queues and exports instead. */
+const appsScript = () => (w.google && w.google.script && w.google.script.run) || null;
+function sendViaAppsScript(batch) {
+  return new Promise((resolve, reject) => {
+    appsScript().withSuccessHandler(resolve).withFailureHandler(reject).ingest({records: batch});
+  });
+}
+async function sendViaFetch(url, batch) {
+  const res = await fetch(url, {
+    method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify({records: batch})
+  });
+  return res.json();
+}
+
 async function flush() {
   if (sending) return;
   const url = C().endpoint;
-  if (!url) return;                                  // queue-only on plain hosting
+  if (!appsScript() && !url) return;                 // queue-only on plain hosting
   if (!w.navigator.onLine) return;
   sending = true;
   try {
     const batch = (await all()).slice(0, C().batchSize);
     if (!batch.length) { sending = false; return; }
-    const res = await fetch(url, {
-      method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify({records: batch})
-    });
-    const ack = await res.json();
+    const ack = appsScript() ? await sendViaAppsScript(batch) : await sendViaFetch(url, batch);
     // Only acknowledged ids leave the outbox; anything else is retried.
     const ids = (ack && Array.isArray(ack.accepted)) ? ack.accepted : [];
     if (ids.length) await drop(ids);
@@ -176,7 +190,7 @@ async function init() {
     catch (e) { return "memory"; }
   })();
 
-  log("game_loaded", {build: w.CONFIG.BUILD, storage: mode});
+  log("game_loaded", {build: w.CONFIG.BUILD, storage: mode, host: appsScript() ? "apps-script" : "web"});
   log("session_start", {ua: navigator.userAgent.slice(0, 120), lang: navigator.language});
 
   setInterval(() => log("session_heartbeat", {elapsed: Math.round(performance.now() / 1000)}), 60000);

@@ -51,6 +51,10 @@ Works on phone and desktop, and offline after the first load.
 │   ├── CONTEXT.md            full project context: rules, economy, data, decisions
 │   ├── data/                 config, default save, level and economy tables
 │   └── export-data.js        regenerates data/ from the game code
+├── google/                   optional Google Sheets logging (Apps Script)
+│   ├── collector.gs          the collector; setup_, doGet, ingest
+│   ├── build.js              bundles the game into INSTALL.gs
+│   └── README.md             setup steps
 ├── ev_check.py               verifies the multiplier curve
 ├── High_Low_Casino_Updated_GDD_v2.2.docx   original design document
 ├── High_Low_Casino_Updated_GDD_v2.3.docx   corrected design document
@@ -77,6 +81,10 @@ python3 ev_check.py                  # multiplier curve vs the real streak proba
 ```
 
 Both must pass after any change to `config.js`.
+
+```sh
+node google/collector.test.js   # 8 checks for the Sheets collector
+```
 
 ---
 
@@ -111,7 +119,9 @@ whole repository instead.
   league placement pays nothing until real opponents exist.
 - **Saves can be edited** in browser DevTools, so nothing here is suitable for
   prizes.
-- **No data is collected.** Analytics are queued locally and never sent.
+- **No data is collected** by the hosted game. Analytics are queued locally and
+  never sent. Deploying the optional [Apps Script build](google/README.md) sends
+  them to a Google Sheet you own.
 
 See [`context/CONTEXT.md`](context/CONTEXT.md) for the full rules, economy
 maths, data format and change history.

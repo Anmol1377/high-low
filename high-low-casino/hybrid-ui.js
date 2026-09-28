@@ -788,7 +788,9 @@ function boot() {
   H.seasonState(save);
 
   // A hosted challenge link prefills the Friend panel. GDD 15.3.
-  const code = new URLSearchParams(location.search).get("c");
+  // On Apps Script the page is in a sandboxed iframe with no query string, so
+  // doGet injects the code instead. GDD 15.3.
+  const code = w.__HLC_CHALLENGE__ || new URLSearchParams(location.search).get("c");
   if (code) { $("ch-in").value = code; openChallenge(null); }
 
   show("menu");

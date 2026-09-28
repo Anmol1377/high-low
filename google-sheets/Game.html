@@ -1,0 +1,2085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<base target="_top">
+<script>window.HIGH_LOW_GOOGLE_BOOT = <?!= boot ?>;</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b17">
+  <meta name="description" content="High Low Casino — a virtual-chip higher-or-lower card game.">
+  <title>High Low Casino</title>
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NiA5NiI+CiAgPGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzMzZTZlMiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2E4NmNmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgcng9IjI0IiBmaWxsPSIjMTAxNTJhIi8+CiAgPHBhdGggZD0iTTIwIDE4aDQxYzggMCAxNSA3IDE1IDE1djQ1SDM1Yy04IDAtMTUtNy0xNS0xNVYxOFoiIGZpbGw9InVybCgjZykiLz4KICA8cGF0aCBkPSJNMjggMjdoNDB2NDJIMzdjLTUgMC05LTQtOS05VjI3WiIgZmlsbD0iIzBiMTAyMSIvPgogIDxwYXRoIGQ9Im00OCAzNCA5IDEyaC02djE1aC02VjQ2aC02bDktMTJaIiBmaWxsPSIjMzNlNmUyIi8+CiAgPGNpcmNsZSBjeD0iNjgiIGN5PSI3MCIgcj0iMTEiIGZpbGw9IiNmZmNhNjIiIHN0cm9rZT0iIzBiMTAyMSIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cjwvc3ZnPgo=" type="image/svg+xml">
+  <style>:root {
+  --bg: #080b17;
+  --panel: rgba(18, 22, 42, .82);
+  --panel-2: rgba(10, 14, 29, .88);
+  --text: #f5f7ff;
+  --muted: #929ab5;
+  --cyan: #33e6e2;
+  --violet: #a86cff;
+  --pink: #ff4fa2;
+  --gold: #ffca62;
+  --danger: #ff5573;
+  --border: rgba(255, 255, 255, .1);
+  --shadow: 0 25px 70px rgba(0, 0, 0, .45);
+}
+
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--bg); }
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(111, 59, 196, .23), transparent 42%),
+    linear-gradient(145deg, #060814 0%, #0b1023 48%, #070a15 100%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+button { font: inherit; }
+button:focus-visible { outline: 3px solid rgba(51, 230, 226, .6); outline-offset: 3px; }
+
+.ambient { position: fixed; z-index: 0; border-radius: 999px; filter: blur(100px); opacity: .16; pointer-events: none; }
+.ambient-one { width: 420px; height: 420px; background: var(--violet); left: -180px; top: 22%; }
+.ambient-two { width: 360px; height: 360px; background: var(--cyan); right: -190px; bottom: 0; }
+.fx-layer { position: fixed; z-index: 60; inset: 0; overflow: hidden; pointer-events: none; }
+.fx-particle { position: absolute; width: 8px; height: 15px; border-radius: 2px; animation: particleFall 1.15s cubic-bezier(.15,.7,.3,1) forwards; }
+@keyframes particleFall { 0% { opacity: 1; transform: translate(0,0) rotate(0); } 100% { opacity: 0; transform: translate(var(--drift), 260px) rotate(var(--spin)); } }
+body.win-flash::after, body.loss-flash::after { content: ''; position: fixed; z-index: 55; inset: 0; pointer-events: none; animation: screenFlash .55s ease-out forwards; }
+body.win-flash::after { background: radial-gradient(circle,rgba(51,230,226,.24),transparent 62%); }
+body.loss-flash::after { background: radial-gradient(circle,rgba(255,85,115,.25),transparent 62%); }
+body.loss-flash .app-shell { animation: screenShake .38s; }
+@keyframes screenFlash { from { opacity: 1; } to { opacity: 0; } }
+@keyframes screenShake { 25% { transform: translateX(-7px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+
+.app-shell { width: min(1100px, calc(100% - 32px)); min-height: 100vh; margin: auto; position: relative; z-index: 1; }
+.topbar { min-height: 86px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.brand { display: flex; gap: 11px; align-items: center; color: white; background: none; border: 0; padding: 5px; cursor: pointer; text-align: left; }
+.brand strong { display: block; font-size: 15px; letter-spacing: 2.8px; }
+.brand small { display: block; color: var(--cyan); font-size: 8px; letter-spacing: 3.6px; margin-top: 2px; }
+.wallet { margin-left: auto; margin-right: 16px; min-width: 132px; height: 44px; border: 1px solid var(--border); background: rgba(255,255,255,.035); border-radius: 14px; display: grid; grid-template-columns: 24px 1fr; align-items: center; padding: 0 13px; }
+.wallet .chip-icon, .mini-chip { color: var(--gold); text-shadow: 0 0 14px rgba(255, 202, 98, .7); }
+.wallet > span:nth-child(2) { font-weight: 800; font-variant-numeric: tabular-nums; }
+.wallet small { grid-column: 2; color: var(--muted); font-size: 7px; letter-spacing: 2px; margin-top: -12px; }
+.test-coins-button { height: 44px; margin-right: 8px; padding: 0 13px; display: grid; grid-template-columns: 18px auto; grid-template-rows: 1fr 1fr; align-items: end; border: 1px solid rgba(51,230,226,.28); border-radius: 14px; background: rgba(51,230,226,.07); color: var(--cyan); cursor: pointer; transition: .2s; }
+.test-coins-button > span { grid-row: 1 / -1; align-self: center; font-size: 18px; }
+.test-coins-button b { font-size: 11px; line-height: 1; text-align: left; }
+.test-coins-button small { align-self: start; margin-top: 2px; color: var(--muted); font-size: 6px; letter-spacing: 1px; white-space: nowrap; }
+.test-coins-button:hover { transform: translateY(-2px); border-color: var(--cyan); background: rgba(51,230,226,.13); }
+.icon-button { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,.035); color: white; cursor: pointer; font-size: 20px; }
+
+.screen { display: none; animation: appear .35s ease; }
+.screen.active { display: block; }
+@keyframes appear { from { opacity: 0; transform: translateY(8px); } }
+
+#menuScreen { padding: 66px 0 42px; }
+.hero-copy { text-align: center; max-width: 750px; margin: 0 auto 46px; }
+.eyebrow { font-size: 10px; letter-spacing: 5px; color: var(--cyan); font-weight: 800; }
+h1 { margin: 15px 0 18px; font-size: clamp(46px, 7vw, 78px); line-height: .92; letter-spacing: -4px; }
+h1 em { font-style: normal; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.48); text-shadow: 0 0 50px rgba(168,108,255,.4); }
+.hero-copy p { max-width: 560px; margin: auto; color: var(--muted); line-height: 1.65; font-size: 14px; }
+.profile-strip { width: 100%; min-height: 73px; margin: -21px 0 20px; padding: 12px 17px; display: grid; grid-template-columns: 48px 155px 1fr auto; align-items: center; gap: 13px; border: 1px solid var(--border); border-radius: 18px; color: white; text-align: left; background: linear-gradient(100deg,rgba(168,108,255,.11),rgba(51,230,226,.06)); cursor: pointer; box-shadow: 0 14px 35px rgba(0,0,0,.2); }
+.profile-strip:hover { border-color: rgba(51,230,226,.34); }
+.profile-rank-icon { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255,202,98,.25); border-radius: 13px; color: var(--gold); background: rgba(255,202,98,.08); font-size: 22px; }
+.profile-identity small, .profile-xp small { display: block; color: var(--muted); font-size: 7px; letter-spacing: 1.3px; }
+.profile-identity b { display: block; margin-top: 3px; font-size: 15px; }
+.profile-xp > span { display: flex; justify-content: space-between; }
+.profile-xp b { color: var(--cyan); font-size: 8px; }
+.profile-xp > i { height: 6px; margin-top: 7px; display: block; overflow: hidden; border-radius: 10px; background: rgba(255,255,255,.07); }
+.profile-xp em { width: 0; height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg,var(--violet),var(--cyan)); transition: width .5s; }
+.profile-link { color: var(--muted); font-size: 8px; letter-spacing: .8px; }
+
+.menu-grid { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 18px; }
+.glass-panel, .stat-card, .daily-card, .mission-strip, .missions-panel { border: 1px solid var(--border); background: linear-gradient(145deg, rgba(23,28,52,.86), rgba(10,14,30,.9)); box-shadow: var(--shadow); }
+.play-panel { border-radius: 22px; padding: 27px; }
+.panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.panel-heading > div { display: flex; align-items: center; gap: 10px; }
+.panel-heading h2 { margin: 0; font-size: 16px; }
+.step { color: var(--cyan); font-size: 10px; font-weight: 900; letter-spacing: 1px; }
+.virtual-label { border: 1px solid rgba(255,202,98,.2); color: var(--gold); background: rgba(255,202,98,.06); padding: 6px 9px; border-radius: 7px; font-size: 8px; letter-spacing: 1.2px; }
+.wager-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+.wager-btn { min-height: 61px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.03); color: var(--muted); cursor: pointer; transition: .2s; font-weight: 800; }
+.wager-btn::before { content: '●'; display: block; font-size: 9px; color: var(--gold); margin-bottom: 3px; }
+.wager-btn:hover:not(:disabled) { border-color: rgba(51,230,226,.45); color: white; transform: translateY(-2px); }
+.wager-btn.active { color: white; border-color: var(--cyan); background: linear-gradient(145deg, rgba(51,230,226,.16), rgba(168,108,255,.12)); box-shadow: 0 0 25px rgba(51,230,226,.1); }
+.wager-btn:disabled { opacity: .28; cursor: not-allowed; }
+.mode-row { display: flex; justify-content: space-between; align-items: center; margin: 22px 0; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+.mode-row > span { display: flex; gap: 10px; align-items: center; font-weight: 700; color: white; }
+.segmented { border: 1px solid var(--border); padding: 4px; border-radius: 12px; display: flex; background: rgba(0,0,0,.15); }
+.mode-btn { border: 0; background: none; color: var(--muted); padding: 8px 13px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+.mode-btn.active { color: white; background: rgba(255,255,255,.1); }
+.skin-section { margin: -3px 0 22px; padding-top: 19px; border-top: 1px solid var(--border); }
+.skin-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.skin-heading > span { display: flex; gap: 10px; align-items: center; font-size: 12px; font-weight: 700; }
+.skin-heading > small { color: var(--muted); font-size: 8px; letter-spacing: .5px; }
+.skin-picker { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.skin-option { position: relative; min-height: 72px; padding: 7px 5px 6px; border: 1px solid var(--border); border-radius: 12px; color: var(--muted); background: rgba(255,255,255,.025); cursor: pointer; transition: .2s; }
+.skin-option:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.24); color: white; }
+.skin-option.active { border-color: var(--cyan); color: white; box-shadow: 0 0 22px rgba(51,230,226,.11); background: rgba(51,230,226,.06); }
+.skin-option.active::after { content: '✓'; position: absolute; right: 6px; top: 5px; width: 15px; height: 15px; border-radius: 50%; display: grid; place-items: center; color: #081016; background: var(--cyan); font-size: 9px; font-weight: 900; }
+.skin-option.locked { opacity: .44; cursor: not-allowed; filter: grayscale(.4); }
+.skin-option.locked::after { content: attr(data-level); position: absolute; inset: auto 4px 4px; padding: 3px; border-radius: 5px; color: #fff; background: rgba(5,8,18,.92); font-size: 6px; letter-spacing: .4px; }
+.skin-option b { display: block; margin-top: 5px; font-size: 8px; letter-spacing: .4px; white-space: nowrap; }
+.skin-swatch { width: 27px; height: 39px; margin: auto; display: block; border-radius: 4px; transform: rotate(4deg); box-shadow: 0 5px 10px rgba(0,0,0,.28); }
+.skin-swatch.neon { border: 2px solid #33e6e2; background: repeating-linear-gradient(45deg,#10162d 0 5px,#252d52 5px 8px); }
+.skin-swatch.classic { border: 3px double #a51d35; background: #f5efe2; }
+.skin-swatch.royal { border: 2px solid #ffca62; background: radial-gradient(circle,#ddb85d 0 8%,transparent 9%),#1b2142; }
+.skin-swatch.cyber { border: 2px solid #ff4fa2; background: linear-gradient(90deg,transparent 48%,#33e6e255 50%,transparent 52%),linear-gradient(#09101e 48%,#a86cff66 50%,#09101e 52%); }
+.skin-swatch.emerald { border: 2px solid #64e6a3; background: repeating-radial-gradient(circle,#0d5e4b 0 3px,#073a32 4px 8px); }
+.primary-button { width: 100%; height: 58px; border: 0; border-radius: 13px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; color: #07111c; background: linear-gradient(100deg, var(--cyan), #66f0cb); font-weight: 900; font-size: 12px; letter-spacing: 1px; cursor: pointer; box-shadow: 0 12px 35px rgba(51,230,226,.18); transition: .2s; }
+.primary-button:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.primary-button b { font-size: 23px; }
+.inline-message { min-height: 16px; color: var(--danger); font-size: 11px; text-align: center; margin: 10px 0 -9px; }
+
+.stats-column { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-card { border-radius: 18px; padding: 22px 18px; display: flex; flex-direction: column; }
+.stat-card > span { font-size: 8px; color: var(--muted); letter-spacing: 1.3px; }
+.stat-card strong { margin-top: auto; font-size: 31px; line-height: 1; }
+.stat-card small { color: var(--muted); font-size: 9px; margin-top: 3px; }
+.daily-card { grid-column: 1 / -1; border-radius: 18px; color: white; padding: 19px; display: flex; align-items: center; text-align: left; cursor: pointer; }
+.daily-card:disabled { opacity: .55; cursor: default; }
+.daily-card .gift { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px; display: grid; place-items: center; background: rgba(168,108,255,.16); color: var(--violet); margin-right: 12px; }
+.daily-card span:nth-child(2) { flex: 1; }
+.daily-card b { display: block; font-size: 12px; }
+.daily-card small { display: block; color: var(--muted); font-size: 9px; margin-top: 4px; }
+.leaderboard-card .gift { color: var(--gold); background: rgba(255,202,98,.11); }
+.missions-panel { margin-top: 18px; padding: 19px; border-radius: 18px; }
+.missions-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 13px; }
+.missions-heading small { color: var(--cyan); font-size: 7px; letter-spacing: 1.5px; }
+.missions-heading h2 { margin: 4px 0 0; font-size: 15px; }
+.missions-heading > span { color: var(--muted); font-size: 7px; letter-spacing: 1px; }
+.daily-mission-list { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.mission-card { min-height: 93px; padding: 12px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.025); }
+.mission-card.complete { border-color: rgba(51,230,226,.3); background: rgba(51,230,226,.05); }
+.mission-card-head { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; }
+.mission-card-head > span:first-child { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; color: var(--violet); background: rgba(168,108,255,.12); }
+.mission-card.complete .mission-card-head > span:first-child { color: var(--cyan); background: rgba(51,230,226,.1); }
+.mission-card-head b { display: block; font-size: 9px; }
+.mission-card-head small { display: block; margin-top: 2px; color: var(--muted); font-size: 7px; }
+.mission-reward { color: var(--gold); font-size: 7px; font-weight: 800; }
+.mission-card .progress-track { margin-top: 11px; }
+.mission-card .progress-track i { background: linear-gradient(90deg,var(--violet),var(--cyan)); }
+.mission-strip { margin-top: 18px; min-height: 76px; border-radius: 18px; display: flex; align-items: center; gap: 24px; padding: 14px 20px; }
+.mission-strip > div:first-child { display: flex; align-items: center; gap: 12px; min-width: 240px; }
+.mission-icon { color: var(--gold); width: 40px; height: 40px; border: 1px solid rgba(255,202,98,.2); border-radius: 11px; display: grid; place-items: center; }
+.mission-strip small { display: block; font-size: 7px; letter-spacing: 1.5px; color: var(--muted); }
+.mission-strip b { display: block; font-size: 11px; margin-top: 4px; }
+.progress-wrap { display: flex; align-items: center; gap: 11px; flex: 1; }
+.progress-track { flex: 1; height: 5px; background: rgba(255,255,255,.07); border-radius: 9px; overflow: hidden; }
+.progress-track i { width: 0; height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg, var(--violet), var(--cyan)); transition: width .35s; }
+.progress-wrap > span { font-size: 9px; color: var(--muted); }
+.reward-pill { color: var(--gold); font-size: 11px; font-weight: 900; border: 1px solid rgba(255,202,98,.18); padding: 8px 10px; border-radius: 9px; }
+
+.game-screen { min-height: calc(100vh - 87px); padding: 20px 0 25px; }
+.game-hud { display: grid; grid-template-columns: 1fr 160px 1fr; align-items: start; }
+.hud-item { border-left: 2px solid var(--cyan); padding: 7px 12px; }
+.hud-item.right { justify-self: end; text-align: right; border-left: 0; border-right: 2px solid var(--gold); }
+.hud-item small, .streak-display small { display: block; color: var(--muted); font-size: 7px; letter-spacing: 1.8px; }
+.hud-item strong { display: block; font-size: 16px; margin-top: 4px; }
+.streak-display { text-align: center; }
+.streak-display strong { display: block; font-size: 28px; line-height: 1; }
+.streak-display span { font-size: 9px; color: var(--cyan); font-weight: 800; letter-spacing: 1px; }
+.timer-wrap { width: 240px; height: 4px; margin: 12px auto 0; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.timer-wrap.hidden { visibility: hidden; }
+.timer-wrap div { height: 100%; width: 100%; background: linear-gradient(90deg, var(--danger), var(--gold), var(--cyan)); transform-origin: left; }
+.combo-wrap { width: min(420px,80vw); margin: 10px auto 0; }
+.combo-copy { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.combo-copy span { color: var(--cyan); font-size: 7px; font-weight: 900; letter-spacing: 1.2px; }
+.combo-copy small { color: var(--muted); font-size: 7px; }
+.combo-track { height: 5px; overflow: hidden; border-radius: 10px; background: rgba(255,255,255,.07); }
+.combo-track i { width: 0; height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg,var(--pink),var(--violet),var(--cyan),var(--gold)); transition: width .45s; }
+.combo-track i.pulse { animation: comboPulse .55s; }
+@keyframes comboPulse { 45% { filter: brightness(2); box-shadow: 0 0 22px var(--cyan); } }
+
+.table-area { min-height: 550px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; isolation: isolate; }
+.table-ring { position: absolute; z-index: -1; width: min(760px, 90vw); height: 360px; border: 1px solid rgba(51,230,226,.12); border-radius: 50%; background: radial-gradient(ellipse, rgba(28,73,72,.22), transparent 68%); box-shadow: inset 0 0 90px rgba(0,0,0,.5), 0 0 80px rgba(51,230,226,.04); transform: perspective(700px) rotateX(58deg); }
+.game-prompt { color: var(--muted); font-size: 12px; margin: 0 0 13px; transition: .2s; }
+.game-prompt.good { color: var(--cyan); }
+.game-prompt.bad { color: var(--danger); }
+.game-prompt.tie { color: var(--gold); }
+.card-stage { position: relative; width: 310px; height: 240px; }
+.playing-card { width: 142px; height: 206px; border-radius: 14px; background: #f7f5ed; color: #151a28; position: absolute; left: 16px; top: 8px; box-shadow: 0 18px 45px rgba(0,0,0,.45); border: 4px solid rgba(255,255,255,.85); overflow: hidden; transform-style: preserve-3d; transition: .45s cubic-bezier(.2,.8,.2,1); }
+.playing-card::before, .playing-card::after { content: attr(data-rank) '\A' attr(data-suit); white-space: pre; position: absolute; font: 800 24px/20px Georgia, serif; text-align: center; }
+.playing-card::before { left: 10px; top: 10px; }
+.playing-card::after { right: 10px; bottom: 10px; transform: rotate(180deg); }
+.playing-card .center-suit { position: absolute; inset: 0; display: grid; place-items: center; font-size: 60px; text-shadow: 0 5px 10px rgba(0,0,0,.12); }
+.playing-card.red { color: #d82f55; }
+.playing-card.card-back { left: 154px; top: 25px; background: #11172d; border-color: #2b3150; transform: rotate(6deg) scale(.92); }
+.playing-card.card-back img { width: 100%; height: 100%; display: block; }
+.playing-card.skin-classic { background: #fffdf6; border: 3px double #272936; box-shadow: 0 18px 45px rgba(0,0,0,.4); }
+.playing-card.skin-classic.red { color: #bd1737; }
+.playing-card.skin-royal { background: linear-gradient(145deg,#fff9e8,#e8d59b); border-color: #d7a93d; box-shadow: 0 0 0 2px #6d5117, 0 18px 48px rgba(255,202,98,.2); color: #18213c; }
+.playing-card.skin-royal.red { color: #9d2235; }
+.playing-card.skin-royal::before, .playing-card.skin-royal::after { text-shadow: 0 1px 0 #fff7d5; }
+.playing-card.skin-cyber { background: linear-gradient(rgba(51,230,226,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(51,230,226,.055) 1px,transparent 1px),#0b1122; background-size: 14px 14px; border-color: #33e6e2; color: #65fff6; box-shadow: 0 0 0 1px #ff4fa2, 0 0 36px rgba(51,230,226,.2); }
+.playing-card.skin-cyber.red { color: #ff5eae; border-color: #ff4fa2; }
+.playing-card.skin-emerald { background: linear-gradient(145deg,#f4faee,#d7ead0); border-color: #2f9d72; color: #113f34; box-shadow: 0 0 0 2px #0a513f, 0 18px 48px rgba(50,211,149,.17); }
+.playing-card.skin-emerald.red { color: #b62e4b; }
+.playing-card.card-back.skin-classic, .playing-card.card-back.skin-royal, .playing-card.card-back.skin-cyber, .playing-card.card-back.skin-emerald { background: #11172d; }
+.playing-card.reveal { animation: revealCard .65s cubic-bezier(.2,.8,.2,1); }
+.playing-card.win { box-shadow: 0 0 0 3px var(--cyan), 0 15px 55px rgba(51,230,226,.38); }
+.playing-card.lose { animation: cardShake .35s; box-shadow: 0 0 0 3px var(--danger), 0 15px 55px rgba(255,85,115,.3); }
+@keyframes revealCard { 0% { transform: rotateY(180deg) translateX(-20px); opacity: .3; } 100% { transform: rotateY(0) translateX(0); opacity: 1; } }
+@keyframes cardShake { 25% { transform: translateX(-8px) rotate(-2deg); } 75% { transform: translateX(8px) rotate(2deg); } }
+.prediction-buttons { display: grid; grid-template-columns: 180px 180px; gap: 18px; margin-top: 12px; }
+.prediction { height: 67px; border-radius: 15px; color: white; border: 1px solid var(--border); cursor: pointer; display: grid; grid-template-columns: 43px 1fr; grid-template-rows: 1fr 1fr; text-align: left; align-items: end; padding: 9px 15px 10px 8px; transition: .2s; }
+.prediction > span { grid-row: 1 / -1; align-self: center; width: 41px; height: 41px; display: grid; place-items: center; border-radius: 12px; font-size: 23px; }
+.prediction b { font-size: 11px; letter-spacing: 1.3px; }
+.prediction small { color: var(--muted); font-size: 8px; align-self: start; margin-top: 2px; }
+.prediction.lower { background: linear-gradient(120deg, rgba(255,79,162,.13), rgba(255,255,255,.03)); }
+.prediction.lower > span { color: var(--pink); background: rgba(255,79,162,.13); }
+.prediction.higher { background: linear-gradient(120deg, rgba(51,230,226,.14), rgba(255,255,255,.03)); }
+.prediction.higher > span { color: var(--cyan); background: rgba(51,230,226,.13); }
+.prediction:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(255,255,255,.25); }
+.prediction:disabled { opacity: .28; cursor: not-allowed; }
+.edge-hint { min-height: 18px; color: var(--gold); font-size: 9px; margin: 10px 0 0; }
+.fairness-row { min-width: 370px; display: flex; justify-content: space-between; gap: 18px; color: rgba(51,230,226,.76); font-size: 7px; letter-spacing: .65px; }
+.fairness-row small { color: var(--muted); letter-spacing: 0; }
+.game-actions { display: flex; justify-content: center; gap: 13px; margin-top: -4px; }
+.secondary-button, .cashout-button { height: 58px; min-width: 210px; border-radius: 14px; cursor: pointer; color: white; border: 1px solid var(--border); }
+.secondary-button { display: grid; grid-template-columns: 35px 1fr; grid-template-rows: 1fr 1fr; align-items: end; text-align: left; background: rgba(255,255,255,.035); padding: 8px 14px; }
+.secondary-button > span { grid-row: 1 / -1; align-self: center; color: var(--violet); font-size: 24px; }
+.secondary-button b { font-size: 10px; }
+.secondary-button small { color: var(--muted); font-size: 8px; align-self: start; }
+.secondary-button.active { border-color: var(--violet); box-shadow: 0 0 25px rgba(168,108,255,.15); }
+.secondary-button:disabled { opacity: .32; cursor: not-allowed; }
+.cashout-button { background: linear-gradient(110deg, var(--gold), #ff9f55); color: #221303; border: 0; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 900; }
+.cashout-button span { font-size: 11px; letter-spacing: 1.2px; }
+.cashout-button b { font-size: 17px; }
+.cashout-button:disabled { filter: grayscale(1); opacity: .25; cursor: not-allowed; }
+
+.toast { position: fixed; z-index: 20; top: 92px; left: 50%; transform: translate(-50%, -20px); opacity: 0; pointer-events: none; padding: 10px 16px; border: 1px solid var(--border); border-radius: 11px; background: rgba(13,17,33,.96); color: white; font-size: 11px; box-shadow: var(--shadow); transition: .25s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.modal { position: fixed; z-index: 30; inset: 0; display: none; place-items: center; padding: 20px; background: rgba(3,5,12,.75); backdrop-filter: blur(10px); }
+.modal.open { display: grid; animation: appear .3s; }
+.modal-card { width: min(430px, 100%); padding: 37px; text-align: center; border-radius: 23px; border: 1px solid var(--border); background: linear-gradient(145deg, #171c35, #0a0e1e); box-shadow: var(--shadow); }
+.result-kicker { color: var(--cyan); font-size: 9px; letter-spacing: 3px; font-weight: 800; }
+.modal-card h2 { font-size: 31px; margin: 11px 0 8px; }
+.modal-card > p { margin: 0; color: var(--muted); font-size: 12px; }
+.result-stats { display: grid; grid-template-columns: repeat(3,1fr); margin: 27px 0 21px; border: 1px solid var(--border); border-radius: 15px; overflow: hidden; }
+.result-stats > div { padding: 17px; }
+.result-stats > div + div { border-left: 1px solid var(--border); }
+.result-stats small { display: block; color: var(--muted); font-size: 7px; letter-spacing: 1.4px; }
+.result-stats strong { display: block; margin-top: 6px; font-size: 25px; }
+.text-button { border: 0; background: none; color: var(--muted); cursor: pointer; margin-top: 18px; font-size: 11px; }
+.modal-card > .text-button + .text-button { margin-left: 10px; }
+.leaderboard-modal-card { width: min(650px, 100%); text-align: left; padding: 29px; }
+.leaderboard-title-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.leaderboard-title-row h2 { margin: 5px 0 0; }
+.modal-close { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 11px; color: var(--muted); background: rgba(255,255,255,.04); cursor: pointer; font-size: 21px; }
+.modal-close:hover { color: white; border-color: rgba(255,255,255,.24); }
+.player-name-row { margin: 21px 0 17px; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.025); display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.player-name-row label { color: var(--muted); font-size: 8px; letter-spacing: 1.4px; font-weight: 800; }
+.player-name-row > div { display: flex; flex: 1; justify-content: flex-end; }
+.player-name-row input { width: min(230px, 100%); height: 36px; padding: 0 11px; border: 1px solid var(--border); border-radius: 9px 0 0 9px; color: white; background: rgba(0,0,0,.23); outline: 0; }
+.player-name-row input:focus { border-color: var(--cyan); }
+.player-name-row button { height: 36px; padding: 0 13px; border: 0; border-radius: 0 9px 9px 0; color: #07111c; background: var(--cyan); font-size: 8px; font-weight: 900; letter-spacing: .7px; cursor: pointer; }
+.leaderboard-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+.leaderboard-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.leaderboard-table th { padding: 10px 12px; text-align: left; color: var(--muted); background: rgba(255,255,255,.035); font-size: 7px; letter-spacing: 1.1px; }
+.leaderboard-table td { padding: 11px 12px; border-top: 1px solid rgba(255,255,255,.06); color: #cbd1e4; }
+.leaderboard-table tr.current-player td { color: white; background: rgba(51,230,226,.055); }
+.leaderboard-table td:first-child { width: 38px; color: var(--muted); font-weight: 900; }
+.leaderboard-table tr:nth-child(1) td:first-child { color: #ffd96e; }
+.leaderboard-table tr:nth-child(2) td:first-child { color: #d8dfed; }
+.leaderboard-table tr:nth-child(3) td:first-child { color: #d99b68; }
+.leaderboard-table .player-cell { font-weight: 800; color: white; }
+.leaderboard-table .reward-cell { color: var(--gold); }
+.mode-pill { display: inline-block; padding: 4px 7px; border-radius: 6px; color: var(--cyan); background: rgba(51,230,226,.08); font-size: 7px; letter-spacing: .6px; text-transform: uppercase; }
+.leaderboard-empty { text-align: center; color: var(--muted); padding: 30px !important; }
+.leaderboard-note { margin: 12px 2px 0; color: var(--muted); font-size: 8px; line-height: 1.5; }
+.leaderboard-rewards { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 11px; }
+.leaderboard-reward { padding: 8px; border: 1px solid rgba(255,202,98,.14); border-radius: 9px; color: var(--muted); background: rgba(255,202,98,.035); text-align: center; font-size: 7px; }
+.leaderboard-reward b { color: var(--gold); }
+.leaderboard-reward.claimed { opacity: .48; }
+.profile-modal-card { width: min(680px,100%); padding: 29px; text-align: left; max-height: 92vh; overflow-y: auto; }
+.profile-modal-head { margin: 19px 0 14px; padding: 16px; display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(100deg,rgba(168,108,255,.1),rgba(51,230,226,.05)); }
+.profile-modal-head > span { width: 51px; height: 51px; display: grid; place-items: center; border: 1px solid rgba(255,202,98,.23); border-radius: 14px; color: var(--gold); font-size: 24px; }
+.profile-modal-head small { color: var(--cyan); font-size: 7px; letter-spacing: 1.4px; }
+.profile-modal-head b { display: block; margin-top: 3px; font-size: 17px; }
+.profile-modal-head p { margin: 3px 0 0; color: var(--muted); font-size: 8px; }
+.profile-modal-head button { padding: 9px 10px; border: 1px solid rgba(168,108,255,.3); border-radius: 9px; color: #d4bdff; background: rgba(168,108,255,.1); font-size: 7px; cursor: pointer; }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.stats-grid > div { padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.025); }
+.stats-grid small { display: block; color: var(--muted); font-size: 7px; letter-spacing: .9px; }
+.stats-grid strong { display: block; margin-top: 5px; font-size: 18px; }
+.badge-heading { display: flex; justify-content: space-between; margin: 20px 2px 10px; color: var(--muted); font-size: 7px; letter-spacing: 1.1px; }
+.achievement-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.achievement { min-height: 105px; padding: 11px 8px; border: 1px solid var(--border); border-radius: 12px; text-align: center; background: rgba(255,255,255,.025); }
+.achievement.unlocked { border-color: rgba(255,202,98,.25); background: rgba(255,202,98,.045); }
+.achievement-icon { width: 34px; height: 34px; margin: 0 auto 7px; display: grid; place-items: center; border-radius: 50%; color: #616981; background: rgba(255,255,255,.05); filter: grayscale(1); }
+.achievement.unlocked .achievement-icon { color: #221303; background: linear-gradient(145deg,#ffe08b,#ffad52); filter: none; box-shadow: 0 0 20px rgba(255,202,98,.18); }
+.achievement b { display: block; font-size: 8px; }
+.achievement small { display: block; margin-top: 4px; color: var(--muted); font-size: 7px; line-height: 1.35; }
+.chest-modal { z-index: 50; }
+.chest-card { position: relative; overflow: hidden; }
+.chest-rays { position: absolute; inset: -80px; display: grid; place-items: center; color: rgba(255,202,98,.09); font-size: 260px; animation: spinRays 8s linear infinite; }
+@keyframes spinRays { to { transform: rotate(360deg); } }
+.chest-card > *:not(.chest-rays) { position: relative; }
+.chest-icon { width: 82px; height: 68px; margin: 0 auto 18px; display: grid; place-items: center; border: 3px solid #9a6622; border-radius: 10px 10px 17px 17px; color: #5c3710; background: linear-gradient(#ffe083 0 38%,#d99130 39%); box-shadow: 0 0 45px rgba(255,202,98,.34); font-size: 31px; animation: chestBounce .7s ease infinite alternate; }
+@keyframes chestBounce { to { transform: translateY(-7px) scale(1.03); } }
+.chest-rewards { display: flex; justify-content: center; gap: 10px; margin: 21px 0; }
+.chest-rewards span { padding: 9px 12px; border: 1px solid rgba(255,202,98,.2); border-radius: 9px; color: var(--gold); background: rgba(255,202,98,.06); font-size: 10px; }
+
+@media (max-width: 760px) {
+  .app-shell { width: min(100% - 20px, 560px); }
+  .topbar { min-height: 72px; }
+  .brand small { display: none; }
+  .wallet { min-width: 112px; margin-right: 8px; }
+  .test-coins-button { width: 44px; padding: 0; display: grid; place-items: center; }
+  .test-coins-button > span { grid-row: auto; font-size: 22px; }
+  .test-coins-button b, .test-coins-button small { display: none; }
+  #menuScreen { padding-top: 40px; }
+  .hero-copy { margin-bottom: 28px; }
+  .profile-strip { margin-top: -10px; grid-template-columns: 44px 110px 1fr; }
+  .profile-link { display: none; }
+  h1 { letter-spacing: -2.5px; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .stats-column { grid-template-rows: 95px auto; }
+  .wager-grid { grid-template-columns: repeat(3, 1fr); }
+  .wager-grid .wager-btn:nth-child(n+7) { display: none; }
+  .skin-picker { grid-template-columns: repeat(5, minmax(54px,1fr)); overflow-x: auto; padding-bottom: 3px; }
+  .daily-mission-list { grid-template-columns: 1fr; }
+  .game-screen { padding-top: 15px; }
+  .table-area { min-height: 500px; }
+  .card-stage { transform: scale(.9); margin: -6px 0; }
+  .prediction-buttons { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); width: 100%; gap: 9px; }
+  .prediction { min-width: 0; }
+  .game-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .secondary-button, .cashout-button { min-width: 0; }
+  .leaderboard-modal-card { padding: 20px 14px; }
+  .player-name-row { display: block; }
+  .player-name-row > div { margin-top: 9px; justify-content: stretch; }
+  .player-name-row input { width: 100%; }
+  .leaderboard-table th, .leaderboard-table td { padding-left: 8px; padding-right: 8px; }
+  .stats-grid, .achievement-grid { grid-template-columns: repeat(2,1fr); }
+  .profile-modal-card { padding: 20px 14px; }
+  .profile-modal-head { grid-template-columns: 50px 1fr; }
+  .profile-modal-head button { grid-column: 1 / -1; }
+}
+
+@media (max-width: 420px) {
+  .brand strong { font-size: 12px; letter-spacing: 2px; }
+  .brand img { width: 36px; height: 36px; }
+  .wallet { height: 40px; font-size: 13px; }
+  .icon-button { width: 40px; height: 40px; }
+  .hero-copy p { font-size: 12px; }
+  .profile-strip { grid-template-columns: 38px 82px 1fr; gap: 8px; padding: 10px; }
+  .profile-rank-icon { width: 36px; height: 36px; }
+  .profile-identity b { font-size: 12px; }
+  .play-panel { padding: 19px; }
+  .panel-heading { align-items: flex-start; }
+  .mode-row { display: block; }
+  .segmented { margin-top: 12px; }
+  .mode-btn { flex: 1; }
+  .game-hud { grid-template-columns: 1fr 90px 1fr; }
+  .hud-item { padding: 5px 7px; }
+  .hud-item strong { font-size: 13px; }
+  .table-area { min-height: 485px; }
+  .fairness-row { min-width: 0; width: 100%; display: grid; gap: 4px; text-align: center; }
+  .prediction { height: 63px; padding-right: 5px; grid-template-columns: 37px 1fr; }
+  .prediction > span { width: 34px; height: 38px; }
+  .secondary-button { padding: 7px; }
+  .secondary-button > span { display: none; }
+  .secondary-button { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+  <style>/* Hybrid-casual interface; secondary activities live in the Player Hub. */
+[hidden]{display:none!important}button{min-height:36px}button:disabled{cursor:not-allowed}.instant-play{max-width:640px;margin:0 auto 30px;text-align:center}.instant-copy h1{font-size:clamp(38px,6vw,66px);margin:15px 0;letter-spacing:-2px}.instant-copy p{color:var(--muted);margin:0 0 22px}.instant-play .primary-button{justify-content:center;font-size:15px;height:64px}.instant-links{display:flex;justify-content:center;gap:10px;margin-top:12px}.instant-links button,.gesture-controls button,.result-social button{color:var(--text);background:#171f38;border:1px solid var(--border);border-radius:10px;padding:10px 16px;cursor:pointer}.microcopy{font-size:11px;color:var(--muted);line-height:1.6}.custom-closed{display:none}.profile-strip{margin-top:10px}.dealer-strip{display:flex;align-items:center;gap:14px;max-width:560px;margin:0 auto 20px;padding:12px 16px;background:#151c32;border:1px solid var(--border);border-radius:18px}.dealer-strip small{font-size:9px;letter-spacing:2px;color:var(--cyan)}.dealer-strip p{margin:5px 0;font-weight:700;font-size:14px}.dealer-strip strong{margin-left:auto;font-size:24px;color:var(--gold)}.dealer-face{flex:0 0 52px;position:relative;height:48px;border:2px solid var(--cyan);border-radius:14px;background:#071426;box-shadow:0 0 20px #33e6e220;animation:byteBob 3s ease-in-out infinite}.dealer-face i{position:absolute;top:12px;width:8px;height:9px;border-radius:50%;background:var(--cyan);left:10px}.dealer-face i+i{left:30px}.dealer-face b{position:absolute;left:17px;top:28px;width:16px;height:5px;border-bottom:2px solid var(--cyan);border-radius:50%}.dealer-face[data-mood=loss] b{transform:rotate(180deg)}.dealer-face[data-mood=perfect],.dealer-face[data-mood=record],.dealer-face[data-mood=legend]{border-color:var(--gold);box-shadow:0 0 24px #ffca6280}.gesture-pad{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}.gesture-controls{text-align:center;margin:18px auto;color:var(--muted);font-size:11px;line-height:1.6}.gesture-controls button{font-size:11px;margin:8px 4px}.gesture-controls #ghostStatus{color:var(--cyan)}.playing-card.reveal{left:154px;top:25px;z-index:3}.fairness-row{flex-wrap:wrap;justify-content:center;max-width:600px;text-align:center;font-size:10px;line-height:1.5}.game-prompt{font-size:14px}.playing-card.skin-aurora{background:#e7fff4;border-color:#7affcc;color:#075844}.playing-card.skin-sunset{background:#fff0e7;border-color:#ff976d;color:#54233f}.playing-card.skin-cosmic{background:#181133;border-color:#c4a0ff;color:#ece1ff}.playing-card.skin-aurora.red,.playing-card.skin-sunset.red{color:#b51845}.playing-card.skin-cosmic.red{color:#ff8dc1}.skin-picker{grid-template-columns:repeat(4,minmax(65px,1fr))}.skin-swatch.aurora{background:#06392f;border:2px solid #7affcc}.skin-swatch.sunset{background:#541d3d;border:2px solid #ff976d}.skin-swatch.cosmic{background:#241843;border:2px solid #c4a0ff}.skin-option{min-height:88px}.skin-option b{font-size:10px}.skin-option.locked::after{font-size:9px}.result-social{border-top:1px solid var(--border);margin-top:18px;padding-top:10px}.result-social p{font-size:12px;color:var(--muted);line-height:1.5}.result-social button{margin:5px;font-size:12px}.result-stats>div{padding:14px 8px}.result-stats strong{font-size:21px}.modal-card{max-height:92dvh;overflow-y:auto}.toast{z-index:90;max-width:90vw;font-size:12px}.hybrid-dialog{width:min(850px,96vw);max-height:92dvh;padding:24px;border:1px solid #425078;border-radius:24px;background:#0d1428;color:var(--text);box-shadow:0 35px 100px #000a}.hybrid-dialog::backdrop{background:#030719cf;backdrop-filter:blur(8px)}.hybrid-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px}.hybrid-dialog header small{color:var(--cyan);letter-spacing:3px;font-size:10px}.hybrid-dialog h2{margin:6px 0 15px}.hybrid-dialog header button{border:1px solid #45516c;color:white;background:#17243d;border-radius:12px;width:44px;font-size:25px}.hybrid-dialog nav{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:16px}.hub-button{display:inline-block;border:1px solid #3a4667;border-radius:10px;background:#1a2440;color:#e9eeff;padding:10px 14px;margin:5px 5px 5px 0;font:600 12px system-ui;cursor:pointer;text-align:left}.hub-button[aria-pressed=true]{background:#214849;border-color:var(--cyan);color:#aaffed}.hub-button:disabled{opacity:.45}.hub-note{font-size:13px;line-height:1.6;color:#b9c3da}.hub-card{border:1px solid #2a3554;border-radius:16px;padding:18px;margin:12px 0;background:#111c34}.hub-card h3{margin:0 0 8px;font-size:18px}.hybrid-dialog textarea{display:block;width:100%;min-height:95px;margin:12px 0;background:#071126;border:1px solid #3a496d;color:#d6e4ff;border-radius:10px;padding:12px;font:13px monospace;resize:vertical;overflow-wrap:anywhere}.cosmetic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.collection-tile{padding:14px;border-radius:10px;background:#182138;color:#7b87a2;border:1px solid #2a3550;font-size:13px;line-height:1.6}.collection-tile.owned{border-color:#33e6e260;color:#d2ffe7;background:#11333b}.journey-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.share-canvas{display:block;width:min(270px,100%);height:auto;margin:0 auto 18px;border-radius:12px}.pack-reveal{font-size:20px;color:var(--gold)}body[data-heat="1"] .table-ring{box-shadow:0 0 55px #33e6e235}body[data-heat="2"] .table-ring,body[data-heat="3"] .table-ring,body[data-heat="4"] .table-ring{border-color:#a86cff88;background:radial-gradient(ellipse,#7635bc55,transparent 70%)}body[data-heat="2"] .ambient-one,body[data-heat="3"] .ambient-one,body[data-heat="4"] .ambient-one{animation:ambientDrift 8s ease-in-out infinite alternate}body[data-heat="3"] .table-area{animation:tableGlow 4s ease-in-out infinite}body[data-heat="4"] .table-ring{border:3px solid #ffca6299;box-shadow:0 0 100px #ffca6233}body[data-heat="4"] .playing-card{box-shadow:0 0 24px #ffca6266}body[data-season=sunset] .ambient-two{background:#ff976d}body[data-season=cosmic] .ambient-two{background:#c4a0ff}@keyframes byteBob{50%{transform:translateY(-3px)}}@keyframes ambientDrift{to{transform:translate(100px,60px)}}@keyframes tableGlow{50%{filter:brightness(1.15)}}body.reduce-effects *,body.reduce-effects *::before,body.reduce-effects *::after{animation:none!important;transition:none!important}body.reduce-effects .fx-layer{display:none}@media(max-width:600px){#menuScreen{padding-top:24px}.hybrid-dialog{padding:16px}.hybrid-dialog nav .hub-button{padding:8px 10px}.cosmetic-grid,.journey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.instant-links{gap:6px}.instant-links button{font-size:12px;padding:9px 12px}.dealer-strip{padding:10px}.skin-picker{grid-template-columns:repeat(4,minmax(54px,1fr))}.table-area{min-height:430px}.topbar{flex-wrap:wrap;gap:6px;padding:8px 0}.wallet{margin-left:auto}.game-actions{grid-template-columns:1fr 1fr}.fairness-row{width:100%;min-width:0}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.fx-layer{display:none}}
+
+.avatar-art{display:inline-block;width:40px;height:40px;vertical-align:middle;object-fit:contain;margin-right:8px}.profile-rank-icon .avatar-art{margin:0}.hub-card>.avatar-art{float:right;width:64px;height:64px}.hub-notice{position:sticky;top:0;z-index:2;padding:14px;background:#214039;border:1px solid #70edb0;border-radius:12px;color:#d4ffe5;font-weight:700;font-size:14px;line-height:1.5}.call-celebration{animation:callCelebrate .6s ease-out}.dealer-face[data-mood=comeback]{border-color:var(--gold)}@keyframes callCelebrate{35%{transform:scale(1.035);box-shadow:0 0 38px #ffca6288}}body[data-heat="1"] #currentCard,body[data-heat="2"] #currentCard{box-shadow:-7px 7px 0 #33e6e233,-14px 14px 0 #a86cff22,0 0 25px #33e6e233}body[data-heat="3"] .table-ring{border-color:#ffca62;box-shadow:0 0 70px #ffca6233}.cashout-button{gap:8px}
+
+@media(max-width:600px){.topbar{flex-wrap:nowrap}.brand{gap:6px}.brand img{width:32px;height:32px}.brand strong{font-size:12px;letter-spacing:1.5px}.wallet{min-width:96px;margin-right:0;padding:0 8px}.test-coins-button{flex:0 0 38px;width:38px;margin-right:0;grid-template-columns:1fr;grid-template-rows:1fr}.icon-button{flex:0 0 38px;width:38px}}
+
+.telemetry-panel{margin:30px auto 16px;padding:16px;max-width:700px;border:1px solid #33415e;border-radius:14px;background:#111b31;color:#bdc9e0;font-size:12px;line-height:1.6}.telemetry-panel p{margin:8px 0}.telemetry-panel button,.log-import{display:inline-block;margin:4px 6px 4px 0;background:#1e3151;border:1px solid #435673;color:#eef5ff;padding:8px 10px;border-radius:8px;cursor:pointer}.log-import input{display:block;max-width:210px;font-size:11px}#telemetryStatus{color:#73eadb;overflow-wrap:anywhere}
+</style>
+<script>window.HIGH_LOW_ASSETS={"avatar-alien.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3QgeD0iMTkiIHk9IjI4IiB3aWR0aD0iNjIiIGhlaWdodD0iNTgiIHJ4PSIyOCIgZmlsbD0iIzlmZmZiNSIvPjxlbGxpcHNlIGN4PSIzNiIgY3k9IjU1IiByeD0iOCIgcnk9IjExIiBmaWxsPSIjMTIxYjMyIi8+PGVsbGlwc2UgY3g9IjY0IiBjeT0iNTUiIHJ4PSI4IiByeT0iMTEiIGZpbGw9IiMxMjFiMzIiLz48cGF0aCBkPSJNNDMgNzJRNTAgNzggNTcgNzIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEyMWIzMiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=","avatar-cat.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZD0iTTI0IDQ4IEwxOCAxMiBMNTIgMzQgTTc2IDQ4IEw4MiAxMiBMNDggMzQiIGZpbGw9IiNiYzk0ZmYiIHN0cm9rZT0iIzEyMWIzMiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHJlY3QgeD0iMTkiIHk9IjI4IiB3aWR0aD0iNjIiIGhlaWdodD0iNTgiIHJ4PSIyOCIgZmlsbD0iI2JjOTRmZiIvPjxlbGxpcHNlIGN4PSIzNiIgY3k9IjU1IiByeD0iNCIgcnk9IjYiIGZpbGw9IiMxMjFiMzIiLz48ZWxsaXBzZSBjeD0iNjQiIGN5PSI1NSIgcng9IjQiIHJ5PSI2IiBmaWxsPSIjMTIxYjMyIi8+PHBhdGggZD0iTTQzIDcyUTUwIDc4IDU3IDcyIiBmaWxsPSJub25lIiBzdHJva2U9IiMxMjFiMzIiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+","avatar-fox.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZD0iTTI0IDQ4IEwxOCAxMiBMNTIgMzQgTTc2IDQ4IEw4MiAxMiBMNDggMzQiIGZpbGw9IiNmZjlmNTciIHN0cm9rZT0iIzEyMWIzMiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHJlY3QgeD0iMTkiIHk9IjI4IiB3aWR0aD0iNjIiIGhlaWdodD0iNTgiIHJ4PSIyOCIgZmlsbD0iI2ZmOWY1NyIvPjxwYXRoIGQ9Ik0yMiA1NyBMNTAgNzEgTDc4IDU3IEw2NSA4MCBRNTAgOTYgMzUgODBaIiBmaWxsPSIjZmZmMGRlIi8+PGVsbGlwc2UgY3g9IjM2IiBjeT0iNTUiIHJ4PSI0IiByeT0iNiIgZmlsbD0iIzEyMWIzMiIvPjxlbGxpcHNlIGN4PSI2NCIgY3k9IjU1IiByeD0iNCIgcnk9IjYiIGZpbGw9IiMxMjFiMzIiLz48cGF0aCBkPSJNNDMgNzJRNTAgNzggNTcgNzIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEyMWIzMiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=","avatar-ghost.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3QgeD0iMTkiIHk9IjI4IiB3aWR0aD0iNjIiIGhlaWdodD0iNTgiIHJ4PSIyOCIgZmlsbD0iI2RkZWFmZiIvPjxwYXRoIGQ9Ik0xOSA2MVY5MkwzMCA4M0w0MSA5Mkw1MiA4M0w2MyA5Mkw3NCA4M0w4MSA5MlY2MVoiIGZpbGw9IiNkZGVhZmYiLz48ZWxsaXBzZSBjeD0iMzYiIGN5PSI1NSIgcng9IjQiIHJ5PSI2IiBmaWxsPSIjMTIxYjMyIi8+PGVsbGlwc2UgY3g9IjY0IiBjeT0iNTUiIHJ4PSI0IiByeT0iNiIgZmlsbD0iIzEyMWIzMiIvPjxwYXRoIGQ9Ik00MyA3MlE1MCA3OCA1NyA3MiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTIxYjMyIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==","avatar-panda.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PGNpcmNsZSBjeD0iMjQiIGN5PSIyOSIgcj0iMTUiIGZpbGw9IiMyNTJlNDkiLz48Y2lyY2xlIGN4PSI3NiIgY3k9IjI5IiByPSIxNSIgZmlsbD0iIzI1MmU0OSIvPjxyZWN0IHg9IjE5IiB5PSIyOCIgd2lkdGg9IjYyIiBoZWlnaHQ9IjU4IiByeD0iMjgiIGZpbGw9IiNmN2Y4ZmMiLz48ZWxsaXBzZSBjeD0iMzYiIGN5PSI1NSIgcng9IjEyIiByeT0iMTQiIGZpbGw9IiMyNTJlNDkiLz48ZWxsaXBzZSBjeD0iNjQiIGN5PSI1NSIgcng9IjEyIiByeT0iMTQiIGZpbGw9IiMyNTJlNDkiLz48ZWxsaXBzZSBjeD0iMzYiIGN5PSI1NSIgcng9IjQiIHJ5PSI2IiBmaWxsPSIjZmZmZmZmIi8+PGVsbGlwc2UgY3g9IjY0IiBjeT0iNTUiIHJ4PSI0IiByeT0iNiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik00MyA3MlE1MCA3OCA1NyA3MiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTIxYjMyIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==","avatar-robot.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZD0iTTUwIDI2VjEzIiBzdHJva2U9IiMzM2U2ZTIiIHN0cm9rZS13aWR0aD0iNCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMTAiIHI9IjUiIGZpbGw9IiNmZmNhNjIiLz48cmVjdCB4PSIxOSIgeT0iMjgiIHdpZHRoPSI2MiIgaGVpZ2h0PSI1OCIgcng9IjE0IiBmaWxsPSIjMzNlNmUyIi8+PGVsbGlwc2UgY3g9IjM2IiBjeT0iNTUiIHJ4PSI0IiByeT0iNiIgZmlsbD0iIzEyMWIzMiIvPjxlbGxpcHNlIGN4PSI2NCIgY3k9IjU1IiByeD0iNCIgcnk9IjYiIGZpbGw9IiMxMjFiMzIiLz48cGF0aCBkPSJNNDMgNzJRNTAgNzggNTcgNzIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEyMWIzMiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=","card-back-aurora.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiM3YWZmY2MiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzA2MzkyZiIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN2FmZmNjIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiMwNjM5MmYiIHN0cm9rZT0iIzdhZmZjYyIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjN2FmZmNjIi8+PC9zdmc+","card-back-classic.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cGF0dGVybiBpZD0icCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cmVjdCB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIGZpbGw9IiM4NzE1MmIiLz48cGF0aCBkPSJNMCA2IDYgMGw2IDYtNiA2WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZThjOGE3IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9IiNmZmY4ZTgiLz48cmVjdCB4PSI3IiB5PSI3IiB3aWR0aD0iMTI2IiBoZWlnaHQ9IjE5MCIgcng9IjgiIGZpbGw9InVybCgjcCkiIHN0cm9rZT0iIzUzMTAxZCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iMTEyIiBoZWlnaHQ9IjE3NiIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZjNkYSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGNpcmNsZSBjeD0iNzAiIGN5PSIxMDIiIHI9IjI4IiBmaWxsPSIjZmZmNGQ4IiBzdHJva2U9IiM1MzEwMWQiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik03MCA4MiA4NCAxMDJsLTE0IDIwLTE0LTIwWiIgZmlsbD0iIzg3MTUyYiIvPgo8L3N2Zz4K","card-back-cosmic.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiNjNGEwZmYiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzI0MTg0MyIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzRhMGZmIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiMyNDE4NDMiIHN0cm9rZT0iI2M0YTBmZiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjYzRhMGZmIi8+PC9zdmc+","card-back-cyber.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE0IiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMTQgMEgwdjE0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzM2U2ZTIiIHN0cm9rZS13aWR0aD0iLjciIG9wYWNpdHk9Ii4yMiIvPjwvcGF0dGVybj48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMzNlNmUyIi8+PHN0b3Agb2Zmc2V0PSIuNDgiIHN0b3AtY29sb3I9IiNhODZjZmYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZjRmYTIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSIjMDcwZDFiIi8+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMSIgZmlsbD0idXJsKCNncmlkKSIvPjxyZWN0IHg9IjciIHk9IjciIHdpZHRoPSIxMjYiIGhlaWdodD0iMTkwIiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2cpIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMjYgMzVoMjJsOC05aDI4bDggOWgyMnYxMzRIOTJsLTggOUg1NmwtOC05SDI2WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY0ZmEyIiBvcGFjaXR5PSIuNTUiLz4KICA8cGF0aCBkPSJtNzAgNjkgMjMgMzMtMjMgMzMtMjMtMzNaIiBmaWxsPSIjMTAxODMyIiBzdHJva2U9IiMzM2U2ZTIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Im03MCA4MiAxMCAxNmgtN3YyM2gtNlY5OGgtN1oiIGZpbGw9IiNmZjRmYTIiLz4KPC9zdmc+Cg==","card-back-emerald.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciPjxzdG9wIHN0b3AtY29sb3I9IiMxNDc2NWQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwNjNjMzIiLz48L3JhZGlhbEdyYWRpZW50PjxwYXR0ZXJuIGlkPSJwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzYxZGNhMyIgc3Ryb2tlLXdpZHRoPSIuOCIgb3BhY2l0eT0iLjI1Ii8+PHBhdGggZD0ibTEwIDMgNyA3LTcgNy03LTdaIiBmaWxsPSJub25lIiBzdHJva2U9IiNkMmFlNTUiIHN0cm9rZS13aWR0aD0iLjYiLz48L3BhdHRlcm4+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9InVybCgjZykiLz48cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSJ1cmwoI3ApIi8+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjEyNCIgaGVpZ2h0PSIxODgiIHJ4PSI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNkOWJiNjciIHN0cm9rZS13aWR0aD0iMyIvPjxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjExMCIgaGVpZ2h0PSIxNzQiIHJ4PSI1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MWUxYWQiLz4KICA8cGF0aCBkPSJNNzAgNjhjMjAgMTUgMjUgMzMgMCA2OC0yNS0zNS0yMC01MyAwLTY4WiIgZmlsbD0iI2Q3YmI2OCIvPjxwYXRoIGQ9Ik03MCA3OWMxMCAxMyAxMiAyNiAwIDQ0LTEyLTE4LTEwLTMxIDAtNDRaIiBmaWxsPSIjMGI1OTQ3Ii8+Cjwvc3ZnPgo=","card-back-royal.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMTAxNzM3Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMjkzNTZhIi8+PC9saW5lYXJHcmFkaWVudD48cGF0dGVybiBpZD0icCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMTIgMiAyMiAxMiAxMiAyMiAyIDEyWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDhiMjRmIiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9Ii4zNSIvPjwvcGF0dGVybj48L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMSIgZmlsbD0idXJsKCNnKSIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9InVybCgjcCkiLz48cmVjdCB4PSI4IiB5PSI4IiB3aWR0aD0iMTI0IiBoZWlnaHQ9IjE4OCIgcng9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YyY2Y2YiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE3NCIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzhlNmQyMyIvPgogIDxwYXRoIGQ9Im03MCA2NyAxMSAyMSAyMyAzLTE3IDE3IDQgMjQtMjEtMTEtMjEgMTEgNC0yNC0xNy0xNyAyMy0zWiIgZmlsbD0iI2RkYjU0ZCIgc3Ryb2tlPSIjZmZmMGE1IiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+Cg==","card-back-sunset.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiNmZjk3NmQiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzU0MWQzZCIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY5NzZkIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiM1NDFkM2QiIHN0cm9rZT0iI2ZmOTc2ZCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjZmY5NzZkIi8+PC9zdmc+","card-back.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJwIiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPgogICAgICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IiMxMjE4MmYiLz48cGF0aCBkPSJNMCAwaDV2MTZIMHoiIGZpbGw9IiMyMDI5NGMiLz4KICAgIDwvcGF0dGVybj4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzM2U2ZTIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNhODZjZmYiLz48L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSJ1cmwoI3ApIi8+CiAgPHJlY3QgeD0iOSIgeT0iOSIgd2lkdGg9IjEyMiIgaGVpZ2h0PSIxODYiIHJ4PSI4IiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjc1Ii8+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE3NCIgcng9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgb3BhY2l0eT0iLjEiLz4KICA8cGF0aCBkPSJtNzAgNjkgMjIgMzEtMjIgMzUtMjItMzUgMjItMzFaIiBmaWxsPSIjMGIxMDIxIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxwYXRoIGQ9Im03MCA4MiAxMCAxNWgtN3YyMGgtNlY5N2gtN2wxMC0xNVoiIGZpbGw9IiMzM2U2ZTIiLz4KPC9zdmc+Cg==","icon.svg":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NiA5NiI+CiAgPGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzMzZTZlMiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2E4NmNmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgcng9IjI0IiBmaWxsPSIjMTAxNTJhIi8+CiAgPHBhdGggZD0iTTIwIDE4aDQxYzggMCAxNSA3IDE1IDE1djQ1SDM1Yy04IDAtMTUtNy0xNS0xNVYxOFoiIGZpbGw9InVybCgjZykiLz4KICA8cGF0aCBkPSJNMjggMjdoNDB2NDJIMzdjLTUgMC05LTQtOS05VjI3WiIgZmlsbD0iIzBiMTAyMSIvPgogIDxwYXRoIGQ9Im00OCAzNCA5IDEyaC02djE1aC02VjQ2aC02bDktMTJaIiBmaWxsPSIjMzNlNmUyIi8+CiAgPGNpcmNsZSBjeD0iNjgiIGN5PSI3MCIgcj0iMTEiIGZpbGw9IiNmZmNhNjIiIHN0cm9rZT0iIzBiMTAyMSIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cjwvc3ZnPgo="};</script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
+
+  <main class="app-shell" aria-live="polite">
+    <header class="topbar">
+      <button class="brand" id="homeButton" aria-label="Return to main menu">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NiA5NiI+CiAgPGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzMzZTZlMiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2E4NmNmZiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgcng9IjI0IiBmaWxsPSIjMTAxNTJhIi8+CiAgPHBhdGggZD0iTTIwIDE4aDQxYzggMCAxNSA3IDE1IDE1djQ1SDM1Yy04IDAtMTUtNy0xNS0xNVYxOFoiIGZpbGw9InVybCgjZykiLz4KICA8cGF0aCBkPSJNMjggMjdoNDB2NDJIMzdjLTUgMC05LTQtOS05VjI3WiIgZmlsbD0iIzBiMTAyMSIvPgogIDxwYXRoIGQ9Im00OCAzNCA5IDEyaC02djE1aC02VjQ2aC02bDktMTJaIiBmaWxsPSIjMzNlNmUyIi8+CiAgPGNpcmNsZSBjeD0iNjgiIGN5PSI3MCIgcj0iMTEiIGZpbGw9IiNmZmNhNjIiIHN0cm9rZT0iIzBiMTAyMSIgc3Ryb2tlLXdpZHRoPSI0Ii8+Cjwvc3ZnPgo=" alt="" width="42" height="42">
+        <span><strong>HIGH LOW</strong><small>NEON CASINO</small></span>
+      </button>
+      <div class="wallet" aria-label="Virtual chip balance">
+        <span class="chip-icon">●</span>
+        <span id="headerChips">2,500</span>
+        <small>CHIPS</small>
+      </div>
+      <button class="test-coins-button" id="addCoinsButton" type="button" title="Add 5,000 test chips" aria-label="Add 5,000 test chips">
+        <span aria-hidden="true">+</span><b>5,000</b><small>TEST CHIPS</small>
+      </button>
+      <button class="icon-button" id="soundButton" aria-label="Mute sound" title="Sound">♪</button>
+    </header>
+
+    <section id="menuScreen" class="screen active">
+      <div class="hero-copy">
+        <span class="eyebrow">READ THE CARD. RISK THE STREAK.</span>
+        <h1>How high<br><em>will you go?</em></h1>
+        <p>Predict the next card, build your multiplier and cash out before one wrong call ends the run.</p>
+      </div>
+
+      <button id="profileButton" class="profile-strip" type="button" aria-label="Open player statistics and achievements">
+        <span id="profileRankIcon" class="profile-rank-icon">◇</span>
+        <span class="profile-identity"><small id="profileRankName">BEGINNER</small><b>Level <span id="profileLevel">1</span></b></span>
+        <span class="profile-xp"><span><small>XP PROGRESS</small><b id="profileXpText">0 / 80</b></span><i><em id="profileXpBar"></em></i></span>
+        <span class="profile-link">STATS &amp; BADGES ›</span>
+      </button>
+
+      <div class="menu-grid">
+        <section class="glass-panel play-panel">
+          <div class="panel-heading">
+            <div><span class="step">01</span><h2>Choose your wager</h2></div>
+            <span class="virtual-label">VIRTUAL CHIPS</span>
+          </div>
+          <div id="wagerButtons" class="wager-grid"></div>
+
+          <div class="mode-row">
+            <span><span class="step">02</span>Game mode</span>
+            <div class="segmented" role="group" aria-label="Game mode">
+              <button class="mode-btn active" data-mode="classic">Classic</button>
+              <button class="mode-btn" data-mode="quick">Quick · 5s</button>
+            </div>
+          </div>
+
+          <div class="skin-section">
+            <div class="skin-heading"><span><span class="step">03</span>Choose card skin</span><small>Saved automatically</small></div>
+            <div id="skinPicker" class="skin-picker" role="radiogroup" aria-label="Card skin"></div>
+          </div>
+
+          <button id="dealButton" class="primary-button">
+            <span>DEAL THE FIRST CARD</span><b>→</b>
+          </button>
+          <p id="menuMessage" class="inline-message"></p>
+        </section>
+
+        <aside class="stats-column">
+          <div class="stat-card"><span>BEST STREAK</span><strong id="bestStreak">0</strong><small>cards</small></div>
+          <div class="stat-card"><span>RUNS PLAYED</span><strong id="runsPlayed">0</strong><small>total</small></div>
+          <button id="dailyRewardButton" class="daily-card">
+            <span class="gift">✦</span>
+            <span><b>Daily Drop</b><small id="dailyRewardText">Claim 500 free chips</small></span>
+            <span>›</span>
+          </button>
+          <button id="leaderboardButton" class="daily-card leaderboard-card">
+            <span class="gift">♛</span>
+            <span><b>Leaderboard</b><small>View local Top 10 rankings</small></span>
+            <span>›</span>
+          </button>
+        </aside>
+      </div>
+
+      <section class="missions-panel">
+        <div class="missions-heading"><div><small>DAILY OBJECTIVES</small><h2>Three missions. Fresh every day.</h2></div><span id="missionsComplete">0 / 3 COMPLETE</span></div>
+        <div id="dailyMissionList" class="daily-mission-list"></div>
+      </section>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen">
+      <div class="game-hud">
+        <div class="hud-item"><small>WAGER</small><strong><span class="mini-chip">●</span> <span id="hudWager">100</span></strong></div>
+        <div class="streak-display"><small>CURRENT STREAK</small><strong id="hudStreak">0</strong><span id="hudMultiplier">START</span></div>
+        <div class="hud-item right"><small>CASH OUT VALUE</small><strong><span class="mini-chip">●</span> <span id="hudCashout">0</span></strong></div>
+      </div>
+
+      <div id="timerWrap" class="timer-wrap hidden"><div id="timerBar"></div></div>
+      <div class="combo-wrap"><div class="combo-copy"><span id="comboText">BUILD YOUR COMBO</span><small id="nextChestText">Chest at streak 3</small></div><div class="combo-track"><i id="comboBar"></i></div></div>
+
+      <div class="table-area">
+        <div class="table-ring"></div>
+        <p id="gamePrompt" class="game-prompt">Will the next card be higher or lower?</p>
+        <div class="card-stage">
+          <div id="currentCard" class="playing-card" aria-label="Current card"></div>
+          <div id="nextCard" class="playing-card card-back" aria-label="Hidden next card">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJwIiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPgogICAgICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IiMxMjE4MmYiLz48cGF0aCBkPSJNMCAwaDV2MTZIMHoiIGZpbGw9IiMyMDI5NGMiLz4KICAgIDwvcGF0dGVybj4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzM2U2ZTIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNhODZjZmYiLz48L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSJ1cmwoI3ApIi8+CiAgPHJlY3QgeD0iOSIgeT0iOSIgd2lkdGg9IjEyMiIgaGVpZ2h0PSIxODYiIHJ4PSI4IiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjc1Ii8+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE3NCIgcng9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgb3BhY2l0eT0iLjEiLz4KICA8cGF0aCBkPSJtNzAgNjkgMjIgMzEtMjIgMzUtMjItMzUgMjItMzFaIiBmaWxsPSIjMGIxMDIxIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxwYXRoIGQ9Im03MCA4MiAxMCAxNWgtN3YyMGgtNlY5N2gtN2wxMC0xNVoiIGZpbGw9IiMzM2U2ZTIiLz4KPC9zdmc+Cg==" alt="">
+          </div>
+        </div>
+        <div class="prediction-buttons">
+          <button id="lowerButton" class="prediction lower"><span>↓</span><b>LOWER</b><small>Next rank is lower</small></button>
+          <button id="higherButton" class="prediction higher"><span>↑</span><b>HIGHER</b><small>Next rank is higher</small></button>
+        </div>
+        <p id="edgeHint" class="edge-hint"></p>
+        <div class="fairness-row"><span>✓ FAIR RNG · EVERY CARD EQUALLY LIKELY</span><small id="oddsHint">Higher 46% · Tie 8% · Lower 46%</small></div>
+      </div>
+
+      <div class="game-actions">
+        <button id="insuranceButton" class="secondary-button"><span>◇</span><b>Protect prediction</b><small id="insuranceCost">Available after first win</small></button>
+        <button id="cashoutButton" class="cashout-button" disabled><span>CASH OUT</span><b id="cashoutButtonValue">—</b></button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="resultModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <span id="resultKicker" class="result-kicker">RUN COMPLETE</span>
+      <h2 id="resultTitle">Smart cash-out!</h2>
+      <p id="resultMessage">Your chips are secured.</p>
+      <div class="result-stats">
+        <div><small>FINAL STREAK</small><strong id="resultStreak">5</strong></div>
+        <div><small>CHIPS EARNED</small><strong id="resultReward">500</strong></div>
+        <div><small>XP EARNED</small><strong id="resultXp">+20</strong></div>
+      </div>
+      <button id="playAgainButton" class="primary-button"><span>PLAY AGAIN</span><b>↻</b></button>
+      <button id="resultLeaderboardButton" class="text-button">View leaderboard</button>
+      <button id="resultHomeButton" class="text-button">Return to main menu</button>
+    </div>
+  </div>
+
+  <div id="leaderboardModal" class="modal" aria-hidden="true">
+    <div class="modal-card leaderboard-modal-card">
+      <div class="leaderboard-title-row">
+        <div><span class="result-kicker">LOCAL RANKINGS</span><h2>Leaderboard</h2></div>
+        <button id="closeLeaderboardButton" class="modal-close" type="button" aria-label="Close leaderboard">×</button>
+      </div>
+      <div class="player-name-row">
+        <label for="playerNameInput">PLAYER NAME</label>
+        <div><input id="playerNameInput" type="text" maxlength="16" autocomplete="nickname" placeholder="Player"><button id="saveNameButton" type="button">SAVE</button></div>
+      </div>
+      <div class="leaderboard-table-wrap">
+        <table class="leaderboard-table">
+          <thead><tr><th>#</th><th>PLAYER</th><th>STREAK</th><th>REWARD</th><th>MODE</th></tr></thead>
+          <tbody id="leaderboardRows"></tbody>
+        </table>
+      </div>
+      <div id="leaderboardRewards" class="leaderboard-rewards"></div>
+      <p class="leaderboard-note">Scores are stored on this device. Higher streak ranks first; reward breaks a tie.</p>
+    </div>
+  </div>
+
+  <div id="profileModal" class="modal" aria-hidden="true">
+    <div class="modal-card profile-modal-card">
+      <div class="leaderboard-title-row">
+        <div><span class="result-kicker">PLAYER PROGRESSION</span><h2>Stats &amp; achievements</h2></div>
+        <button id="closeProfileButton" class="modal-close" type="button" aria-label="Close player profile">×</button>
+      </div>
+      <div class="profile-modal-head">
+        <span id="modalRankIcon">◇</span><div><small id="modalRankName">BEGINNER</small><b>Level <span id="modalLevel">1</span></b><p id="modalNextRank">Next rank: Player at level 5</p></div>
+        <button id="addXpButton" type="button">+250 TEST XP</button>
+      </div>
+      <div class="stats-grid">
+        <div><small>WIN RATE</small><strong id="statWinRate">0%</strong></div>
+        <div><small>AVERAGE STREAK</small><strong id="statAverageStreak">0.0</strong></div>
+        <div><small>HIGHEST REWARD</small><strong id="statHighestReward">0</strong></div>
+        <div><small>PREDICTIONS</small><strong id="statPredictions">0</strong></div>
+      </div>
+      <div class="badge-heading"><span>ACHIEVEMENT BADGES</span><small id="badgeCount">0 / 8 UNLOCKED</small></div>
+      <div id="achievementGrid" class="achievement-grid"></div>
+    </div>
+  </div>
+
+  <div id="chestModal" class="modal chest-modal" aria-hidden="true">
+    <div class="modal-card chest-card">
+      <span class="chest-rays">✦</span>
+      <div class="chest-icon">▣</div>
+      <span class="result-kicker">STREAK MILESTONE</span>
+      <h2><span id="chestStreak">3</span>-card chest!</h2>
+      <p>You reached a new streak milestone.</p>
+      <div class="chest-rewards"><span>★ <b id="chestXp">12</b> XP</span><span>Cosmetic milestone · no chip grant</span></div>
+      <button id="collectChestButton" class="primary-button" type="button"><span>COLLECT &amp; CONTINUE</span><b>→</b></button>
+    </div>
+  </div>
+
+  <noscript>This game requires JavaScript.</noscript>
+  <script>/* Game-only telemetry. Google-hosted build uses google.script.run; no credentials in browser. */
+(function () {
+  'use strict';
+  const BUILD='2.4.0', DB='high-low-telemetry-v1', PREFIX=DB+':', CHUNK=20000;
+  const uuid=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
+  let playerId;try{playerId=localStorage.getItem(PREFIX+'player');if(!playerId){playerId=uuid();localStorage.setItem(PREFIX+'player',playerId);}}catch(_){playerId=uuid();}
+  const sessionId=uuid(),started=Date.now();let seq=0,db=null,memory=new Map(),storageMode='initializing',status='Starting local log',lastAck='',lastAckProgressRevision=0,pending=0,busy=false,retry=0,nextAttempt=0,readGame=null,lastSnapshot='',lastProgress='',visibleAt=document.hidden?0:Date.now(),visibleMs=0,storageWarning='',ready;
+  function announce(){const e=document.getElementById('telemetryStatus');if(e)e.textContent=(storageWarning?storageWarning+' · ':'')+status+' · '+pending+' queued'+(lastAck?' · last synced '+new Date(lastAck).toLocaleTimeString():'')+(lastAckProgressRevision?' · progress v'+lastAckProgressRevision+' synced':'');}
+  function request(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+  function transaction(mode,fn){return new Promise((resolve,reject)=>{const tx=db.transaction('outbox',mode);fn(tx.objectStore('outbox'));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Local transaction aborted'));});}
+  async function rows(){const all=new Map();if(db)for(const r of await request(db.transaction('outbox').objectStore('outbox').getAll()))all.set(r.id,r);for(const [id,r] of memory)all.set(id,r);try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(PREFIX+'event:')){const row=JSON.parse(localStorage.getItem(k));all.set(row.id,row);}}}catch(_){status='Local log read failed — export pending data';}return [...all.values()];}
+  async function put(batch){if(db){try{await transaction('readwrite',s=>batch.forEach(r=>s.put(r)));return;}catch(_){storageWarning='Local database unavailable; using browser fallback';}}
+    batch.forEach(r=>{try{localStorage.setItem(PREFIX+'event:'+r.id,JSON.stringify(r));}catch(_){memory.set(r.id,r);storageWarning='Storage full/unavailable — export pending logs before closing';}});
+  }
+  async function remove(ids){if(db)await transaction('readwrite',s=>ids.forEach(id=>s.delete(id)));for(const id of ids){memory.delete(id);try{localStorage.removeItem(PREFIX+'event:'+id);}catch(_){}}}
+  ready=(async()=>{try{if(!globalThis.indexedDB)throw Error('No IndexedDB');const req=indexedDB.open(DB,1);req.onupgradeneeded=()=>req.result.createObjectStore('outbox',{keyPath:'id'});db=await request(req);storageMode='IndexedDB';}catch(_){storageMode='browser fallback';}
+    const recovered=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(PREFIX+'event:'))recovered.push(JSON.parse(localStorage.getItem(k)));}}catch(_){}
+    if(db&&recovered.length){await put(recovered);recovered.forEach(r=>{try{localStorage.removeItem(PREFIX+'event:'+r.id);}catch(_){}});}
+    pending=(await rows()).length;status=globalThis.google?.script?.run?'Waiting to sync':'Local logging — open Google deployment to sync';announce();
+  })();
+  let chain=ready;
+  function record(type,data={},runId=''){
+    try{const json=JSON.stringify(data),id=sessionId+'-'+(++seq),chunks=[];for(let offset=0;offset<json.length;){let end=Math.min(offset+CHUNK,json.length);if(end<json.length&&/[\uD800-\uDBFF]/.test(json[end-1]))end--;chunks.push(json.slice(offset,end));offset=end;}const count=chunks.length,at=new Date().toISOString();const batch=[];
+      for(let part=0;part<count;part++)batch.push({id:id+'.'+part,eventId:id,playerId,sessionId,runId:String(runId||''),sequence:seq,at,type,part,parts:count,build:BUILD,json:chunks[part],summary:part===0?summary(data):{}});
+      chain=chain.then(()=>put(batch)).then(()=>{pending+=batch.length;announce();}).catch(()=>{batch.forEach(r=>memory.set(r.id,r));storageWarning='Log persistence failed — export before closing';announce();});return batch;
+    }catch(_){status='Could not serialize a game log';announce();return [];}
+  }
+  function summary(data){const s=data.save||data;return {name:String(s.playerName||s.name||''),chips:Number(s.chips)||0,xp:Number(s.totalXp||s.xp)||0,level:Number(data.level||s.level)||0,rank:String(data.rank||s.rank||''),streak:Number(s.bestStreak??s.streak??s.streakAfter)||0,reward:Number(s.reward)||0,mode:String(s.mode||data.run?.mode||''),skin:String(s.cardSkin||s.skin||''),amount:Number(s.amount)||0,before:Number(s.before)||0,after:Number(s.after)||0,currency:String(s.currency||''),reason:String(s.reason||''),direction:String(s.direction||''),result:String(s.result||''),fromRank:Number(s.from?.rank||s.current?.rank)||0,toRank:Number(s.to?.rank||s.next?.rank)||0,elapsedMs:Number(s.elapsedMs??s.durationMs)||0,visibleMs:Number(s.visibleMs)||0};}
+  function snapshot(save,run,level,rank){const data={save,run,level,rank};let json;try{json=JSON.stringify(data);}catch(_){return;}if(json===lastSnapshot)return;lastSnapshot=json;record('player_snapshot',data,run?.id);}
+  function progress(save,level,rank){
+    const h=save.hybrid||{},d=save.dailyMissions||{},stats=save.stats||{};
+    const definitions=window.HighLowHybrid?.missions?.(Date.parse((d.date||new Date().toISOString().slice(0,10))+'T12:00:00Z'))||Object.keys(d.progress||{}).slice(0,3).map(id=>({id}));
+    const missions=definitions.slice(0,3).map(m=>({id:m.id,progress:Number(d.progress?.[m.id])||0,claimed:Boolean(d.claimed?.[m.id])}));
+    const data={revision:save.progressRevision,saveVersion:2,name:save.playerName,chips:save.chips,totalXp:save.totalXp,level,rank,bestStreak:save.bestStreak,cardSkin:save.cardSkin,runsPlayed:save.runsPlayed,lastDailyReward:save.lastDailyReward,
+      stats,missionDay:d.date||'',missions,achievements:Object.keys(save.achievements||{}).filter(id=>save.achievements[id]).slice(0,100),
+      owned:(h.owned||[]).slice(0,100),inventory:h.inventory||{},identity:h.identity||{},seasonSkins:(h.seasonSkins||[]).slice(0,100),weeklyBadges:(h.weeklyBadges||[]).slice(-100),
+      season:h.season||{},week:{id:h.week?.id||'',correct:Number(h.week?.correct)||0,league:Number(h.week?.correct)>=100?'Diamond':Number(h.week?.correct)>=50?'Gold':Number(h.week?.correct)>=20?'Silver':'Bronze'},
+      login:h.login||{},dailyBest:h.dailyBest||{},lastMode:h.lastMode||'',lastWager:Number(h.lastWager)||0,perfectCalls:Number(h.perfect)||0,lastSeen:Number(h.lastSeen)||0,settings:h.settings||{}};
+    let json;try{json=JSON.stringify(data);}catch(_){return;}
+    if(json===lastProgress)return;
+    if(json.length>CHUNK){record('progress_sync_error',{revision:data.revision,message:'Progress projection exceeds one chunk; full save remains in player_snapshot'});return;}
+    lastProgress=json;record('progress_snapshot',data);
+  }
+  function sessionInfo(){return {elapsedMs:Date.now()-started,visibleMs:visibleMs+(visibleAt?Date.now()-visibleAt:0),visibility:document.visibilityState,online:navigator.onLine};}
+  function checkpoint(type){const batch=record(type,sessionInfo(),readGame?.().run?.id); // synchronous emergency copy for page-close recovery
+    for(const r of batch)try{localStorage.setItem(PREFIX+'event:'+r.id,JSON.stringify(r));}catch(_){}
+  }
+  function rpc(batch){return new Promise((resolve,reject)=>{let settled=false;const timer=setTimeout(()=>{settled=true;reject(Error('Google did not acknowledge within 25 seconds'));},25000);google.script.run.withSuccessHandler(r=>{if(!settled){clearTimeout(timer);resolve(r);}}).withFailureHandler(e=>{if(!settled){clearTimeout(timer);reject(Error(e?.message||'Google write failed'));}}).ingest({version:1,records:batch});});}
+  async function flush(force=false){await chain;if(busy||(!force&&Date.now()<nextAttempt))return;
+    if(!globalThis.google?.script?.run){status='Local logging — open Google deployment to sync';announce();return;}
+    if(navigator.onLine===false){status='Offline — logs queued';announce();return;}
+    busy=true;try{const all=(await rows()).sort((a,b)=>a.at.localeCompare(b.at)||a.sessionId.localeCompare(b.sessionId)||a.sequence-b.sequence||a.part-b.part);pending=all.length;if(!all.length){status='Google Sheets up to date';return;}
+      const batch=[];for(const r of all.slice(0,20)){if(batch.length&&JSON.stringify({version:1,records:[...batch,r]}).length>450000)break;batch.push(r);}status='Syncing with Google Sheets';announce();const res=await rpc(batch),sent=new Set(batch.map(r=>r.id));
+      if(!res||res.ok!==true||!Array.isArray(res.acked)||res.acked.some(id=>!sent.has(id)))throw Error('Invalid Google acknowledgement');
+      if(!res.acked.length)throw Error('Google acknowledged no records');
+      for(const r of batch)if(r.type==='progress_snapshot'&&res.acked.includes(r.id)){try{lastAckProgressRevision=Math.max(lastAckProgressRevision,JSON.parse(r.json).revision||0);}catch(_){}}
+      await remove(res.acked);pending=(await rows()).length;lastAck=new Date().toISOString();retry=0;nextAttempt=Date.now()+1000;status=pending?'Synced batch — more queued':'Google Sheets up to date';
+    }catch(e){retry++;nextAttempt=Date.now()+Math.min(120000,2000*2**Math.min(retry,6))+Math.random()*1000;status='Sync retry pending: '+String(e.message).slice(0,140);}finally{busy=false;announce();}
+  }
+  function downloadJson(name,data){const a=document.createElement('a');a.download=name;a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+  async function exportLogs(){await chain;const data={version:1,exportedAt:new Date().toISOString(),records:await rows()};const a=document.createElement('a');a.download='High_Low_Unsent_Logs.json';a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+  async function importLogs(file){if(file.size>20000000)throw Error('Split backups larger than 20 MB before importing');const data=JSON.parse(await file.text());if(data.version!==1||!Array.isArray(data.records)||data.records.some(r=>!r.id||typeof r.json!=='string'||r.json.length>CHUNK||!r.playerId||!r.sessionId))throw Error('Invalid telemetry backup');await chain;await put(data.records);pending=(await rows()).length;announce();flush(true);}
+  function controls(){const p=document.createElement('section');p.className='telemetry-panel';p.innerHTML='<b>Game data &amp; Google Sheets</b><p id="telemetryStatus" role="status"></p><p>Game actions, display name, progress, rewards and session activity are logged. Google-hosted play sends these to the game owner’s spreadsheet.</p><button id="syncLogsButton" type="button">Sync now</button><button id="exportLogsButton" type="button">Export unsent logs</button><button id="exportProgressButton" type="button">Export progress</button><label class="log-import">Import progress <input id="importProgressInput" type="file" accept="application/json"></label><label class="log-import">Import log backup <input id="importLogsInput" type="file" accept="application/json"></label>';
+    document.querySelector('.app-shell').appendChild(p);document.getElementById('syncLogsButton').onclick=()=>flush(true);document.getElementById('exportLogsButton').onclick=exportLogs;
+    document.getElementById('exportProgressButton').onclick=()=>downloadJson('High_Low_Progress.json',{version:1,playerId,save:readGame?.().save});
+    document.getElementById('importProgressInput').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5000000)throw Error('Progress file exceeds 5 MB');const data=JSON.parse(await file.text());if(data.version!==1||!data.save||!Number.isFinite(data.save.chips)||data.save.chips<0||!Number.isFinite(data.save.totalXp)||typeof data.playerId!=='string'||data.playerId.length>200)throw Error('Invalid progress backup');if(readGame?.().run&&!readGame().run.ended)throw Error('Finish the current run before importing progress');if(!confirm('Replace this browser’s game progress with the selected backup?'))return;await chain;localStorage.setItem(window.HIGH_LOW_CONFIG.saveKey,JSON.stringify(data.save));localStorage.setItem(PREFIX+'player',data.playerId);location.reload();}catch(error){status=error.message;announce();}e.target.value='';};document.getElementById('importLogsInput').onchange=async e=>{if(!e.target.files[0])return;try{await importLogs(e.target.files[0]);}catch(error){status=error.message;announce();}e.target.value='';};announce();
+  }
+  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.closest('.telemetry-panel'))record('ui_click',{control:b.id||b.dataset.mode||'button',label:b.textContent.trim().slice(0,120),screen:document.querySelector('.screen.active')?.id||''},readGame?.().run?.id);},true);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&visibleAt){visibleMs+=Date.now()-visibleAt;visibleAt=0;}else if(!document.hidden)visibleAt=Date.now();checkpoint(document.hidden?'session_hidden':'session_visible');flush(true);});
+  window.addEventListener('pagehide',()=>checkpoint('session_pagehide'));
+  window.addEventListener('pageshow',e=>{if(e.persisted){record('session_resume',sessionInfo());flush(true);}});
+  window.addEventListener('online',()=>{record('network_online');flush(true);});window.addEventListener('offline',()=>record('network_offline'));
+  window.addEventListener('error',e=>record('client_error',{message:String(e.message||'Resource loading error').slice(0,4000),line:e.lineno||0,column:e.colno||0}));
+  window.addEventListener('unhandledrejection',e=>record('client_error',{message:String(e.reason?.message||e.reason||'Unhandled promise rejection').slice(0,4000)}));
+  setInterval(()=>flush(),3000);setInterval(()=>record('session_heartbeat',sessionInfo(),readGame?.().run?.id),30000);
+  record('session_start',{...sessionInfo(),viewport:{width:innerWidth,height:innerHeight},language:navigator.language,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
+  window.HighLowTelemetry={record,snapshot,progress,attach(reader){readGame=reader;controls();flush();},flush,exportLogs,importLogs,status:()=>({status,pending,lastAck,lastAckProgressRevision,storageMode,playerId,sessionId}),drain:()=>chain};
+})();
+</script>
+  <script>window.HIGH_LOW_CONFIG = Object.freeze({
+  title: "High Low Casino",
+  startingChips: 2500,
+  testCoinGrant: 5000,
+  testXpGrant: 250,
+  dailyReward: 500,
+  dailyRewardCooldownHours: 24,
+  leaderboardLimit: 10,
+  defaultPlayerName: "Player",
+
+  xp: {
+    maxLevel: 50,
+    basePerLevel: 80,
+    growthPerLevel: 28,
+    runBase: 5,
+    correctPrediction: 3,
+    cashOutBonus: 8
+  },
+
+  ranks: [
+    { minLevel: 1, name: "Beginner", icon: "◇" },
+    { minLevel: 5, name: "Player", icon: "◆" },
+    { minLevel: 10, name: "Risk Taker", icon: "▲" },
+    { minLevel: 18, name: "Card Expert", icon: "♠" },
+    { minLevel: 27, name: "High Roller", icon: "♛" },
+    { minLevel: 38, name: "Casino Master", icon: "✦" },
+    { minLevel: 50, name: "Prediction Legend", icon: "★" }
+  ],
+
+  cardSkins: [
+    { id: "neon", name: "Neon", unlockLevel: 1, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJwIiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPgogICAgICA8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IiMxMjE4MmYiLz48cGF0aCBkPSJNMCAwaDV2MTZIMHoiIGZpbGw9IiMyMDI5NGMiLz4KICAgIDwvcGF0dGVybj4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzM2U2ZTIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNhODZjZmYiLz48L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSJ1cmwoI3ApIi8+CiAgPHJlY3QgeD0iOSIgeT0iOSIgd2lkdGg9IjEyMiIgaGVpZ2h0PSIxODYiIHJ4PSI4IiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjc1Ii8+CiAgPHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE3NCIgcng9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgb3BhY2l0eT0iLjEiLz4KICA8cGF0aCBkPSJtNzAgNjkgMjIgMzEtMjIgMzUtMjItMzUgMjItMzFaIiBmaWxsPSIjMGIxMDIxIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxwYXRoIGQ9Im03MCA4MiAxMCAxNWgtN3YyMGgtNlY5N2gtN2wxMC0xNVoiIGZpbGw9IiMzM2U2ZTIiLz4KPC9zdmc+Cg==" },
+    { id: "classic", name: "Classic", unlockLevel: 5, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cGF0dGVybiBpZD0icCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cmVjdCB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIGZpbGw9IiM4NzE1MmIiLz48cGF0aCBkPSJNMCA2IDYgMGw2IDYtNiA2WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZThjOGE3IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9IiNmZmY4ZTgiLz48cmVjdCB4PSI3IiB5PSI3IiB3aWR0aD0iMTI2IiBoZWlnaHQ9IjE5MCIgcng9IjgiIGZpbGw9InVybCgjcCkiIHN0cm9rZT0iIzUzMTAxZCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iMTEyIiBoZWlnaHQ9IjE3NiIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZjNkYSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGNpcmNsZSBjeD0iNzAiIGN5PSIxMDIiIHI9IjI4IiBmaWxsPSIjZmZmNGQ4IiBzdHJva2U9IiM1MzEwMWQiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik03MCA4MiA4NCAxMDJsLTE0IDIwLTE0LTIwWiIgZmlsbD0iIzg3MTUyYiIvPgo8L3N2Zz4K" },
+    { id: "royal", name: "Royal", unlockLevel: 12, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMTAxNzM3Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMjkzNTZhIi8+PC9saW5lYXJHcmFkaWVudD48cGF0dGVybiBpZD0icCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMTIgMiAyMiAxMiAxMiAyMiAyIDEyWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDhiMjRmIiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9Ii4zNSIvPjwvcGF0dGVybj48L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMSIgZmlsbD0idXJsKCNnKSIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9InVybCgjcCkiLz48cmVjdCB4PSI4IiB5PSI4IiB3aWR0aD0iMTI0IiBoZWlnaHQ9IjE4OCIgcng9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YyY2Y2YiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjE3NCIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzhlNmQyMyIvPgogIDxwYXRoIGQ9Im03MCA2NyAxMSAyMSAyMyAzLTE3IDE3IDQgMjQtMjEtMTEtMjEgMTEgNC0yNC0xNy0xNyAyMy0zWiIgZmlsbD0iI2RkYjU0ZCIgc3Ryb2tlPSIjZmZmMGE1IiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+Cg==" },
+    { id: "cyber", name: "Cyber", unlockLevel: 20, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE0IiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMTQgMEgwdjE0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzM2U2ZTIiIHN0cm9rZS13aWR0aD0iLjciIG9wYWNpdHk9Ii4yMiIvPjwvcGF0dGVybj48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMzNlNmUyIi8+PHN0b3Agb2Zmc2V0PSIuNDgiIHN0b3AtY29sb3I9IiNhODZjZmYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZjRmYTIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSIjMDcwZDFiIi8+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMSIgZmlsbD0idXJsKCNncmlkKSIvPjxyZWN0IHg9IjciIHk9IjciIHdpZHRoPSIxMjYiIGhlaWdodD0iMTkwIiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2cpIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMjYgMzVoMjJsOC05aDI4bDggOWgyMnYxMzRIOTJsLTggOUg1NmwtOC05SDI2WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY0ZmEyIiBvcGFjaXR5PSIuNTUiLz4KICA8cGF0aCBkPSJtNzAgNjkgMjMgMzMtMjMgMzMtMjMtMzNaIiBmaWxsPSIjMTAxODMyIiBzdHJva2U9IiMzM2U2ZTIiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Im03MCA4MiAxMCAxNmgtN3YyM2gtNlY5OGgtN1oiIGZpbGw9IiNmZjRmYTIiLz4KPC9zdmc+Cg==" },
+    { id: "emerald", name: "Emerald", unlockLevel: 30, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij4KICA8ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciPjxzdG9wIHN0b3AtY29sb3I9IiMxNDc2NWQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwNjNjMzIiLz48L3JhZGlhbEdyYWRpZW50PjxwYXR0ZXJuIGlkPSJwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjciIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzYxZGNhMyIgc3Ryb2tlLXdpZHRoPSIuOCIgb3BhY2l0eT0iLjI1Ii8+PHBhdGggZD0ibTEwIDMgNyA3LTcgNy03LTdaIiBmaWxsPSJub25lIiBzdHJva2U9IiNkMmFlNTUiIHN0cm9rZS13aWR0aD0iLjYiLz48L3BhdHRlcm4+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiByeD0iMTEiIGZpbGw9InVybCgjZykiLz48cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjIwNCIgcng9IjExIiBmaWxsPSJ1cmwoI3ApIi8+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjEyNCIgaGVpZ2h0PSIxODgiIHJ4PSI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNkOWJiNjciIHN0cm9rZS13aWR0aD0iMyIvPjxyZWN0IHg9IjE1IiB5PSIxNSIgd2lkdGg9IjExMCIgaGVpZ2h0PSIxNzQiIHJ4PSI1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MWUxYWQiLz4KICA8cGF0aCBkPSJNNzAgNjhjMjAgMTUgMjUgMzMgMCA2OC0yNS0zNS0yMC01MyAwLTY4WiIgZmlsbD0iI2Q3YmI2OCIvPjxwYXRoIGQ9Ik03MCA3OWMxMCAxMyAxMiAyNiAwIDQ0LTEyLTE4LTEwLTMxIDAtNDRaIiBmaWxsPSIjMGI1OTQ3Ii8+Cjwvc3ZnPgo=" },
+    { id: "aurora", name: "Aurora", unlockLevel: 999, seasonal:true, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiM3YWZmY2MiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzA2MzkyZiIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN2FmZmNjIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiMwNjM5MmYiIHN0cm9rZT0iIzdhZmZjYyIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjN2FmZmNjIi8+PC9zdmc+" },
+    { id: "sunset", name: "Sunset", unlockLevel: 999, seasonal:true, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiNmZjk3NmQiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzU0MWQzZCIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmY5NzZkIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiM1NDFkM2QiIHN0cm9rZT0iI2ZmOTc2ZCIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjZmY5NzZkIi8+PC9zdmc+" },
+    { id: "cosmic", name: "Cosmic", unlockLevel: 999, seasonal:true, backAsset: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMjA0Ij48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTEyIDQgMTQgMTAgMjAgMTIgMTQgMTQgMTIgMjAgMTAgMTQgNCAxMiAxMCAxMFoiIGZpbGw9IiNjNGEwZmYiIG9wYWNpdHk9Ii4zMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMDQiIHJ4PSIxMCIgZmlsbD0iIzI0MTg0MyIvPjxyZWN0IHdpZHRoPSIxNDAiIGhlaWdodD0iMjA0IiBmaWxsPSJ1cmwoI3N0YXJzKSIvPjxyZWN0IHg9IjgiIHk9IjgiIHdpZHRoPSIxMjQiIGhlaWdodD0iMTg4IiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzRhMGZmIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjEwMiIgcj0iMjgiIGZpbGw9IiMyNDE4NDMiIHN0cm9rZT0iI2M0YTBmZiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTcwIDgxIDc3IDk2IDkzIDEwMiA3NyAxMDggNzAgMTIzIDYzIDEwOCA0NyAxMDIgNjMgOTZaIiBmaWxsPSIjYzRhMGZmIi8+PC9zdmc+" }
+  ],
+
+  streakChests: [
+    { streak: 3, xp: 12 },
+    { streak: 5, xp: 25 },
+    { streak: 8, xp: 45 },
+    { streak: 10, xp: 70 },
+    { streak: 15, xp: 150 }
+  ],
+
+  dailyMissions: [
+    { id: "streak_5", title: "Reach a 5-card streak", type: "maxStreak", target: 5, rewardChips: 300, rewardXp: 35, icon: "▲" },
+    { id: "complete_3", title: "Complete 3 runs", type: "runs", target: 3, rewardChips: 200, rewardXp: 25, icon: "↻" },
+    { id: "cashout_1000", title: "Cash out 1,000 chips", type: "cashout", target: 1000, rewardChips: 400, rewardXp: 40, icon: "●" }
+  ],
+
+  achievements: [
+    { id: "first_cashout", title: "First Fortune", description: "Cash out your first run", icon: "✦" },
+    { id: "streak_5", title: "Hot Hand", description: "Reach a 5-card streak", icon: "♨" },
+    { id: "streak_10", title: "Untouchable", description: "Reach a 10-card streak", icon: "♠" },
+    { id: "reward_5000", title: "Big Winner", description: "Cash out 5,000 chips", icon: "♛" },
+    { id: "runs_25", title: "Table Regular", description: "Complete 25 runs", icon: "↻" },
+    { id: "level_10", title: "Risk Taker", description: "Reach player level 10", icon: "▲" },
+    { id: "level_30", title: "Skin Collector", description: "Unlock every standard skin", icon: "◆" },
+    { id: "predictions_100", title: "Card Reader", description: "Make 100 predictions", icon: "◎" }
+  ],
+
+  leaderboardRewards: [
+    { place: 1, chips: 1500, xp: 200 },
+    { place: 2, chips: 750, xp: 100 },
+    { place: 3, chips: 400, xp: 50 }
+  ],
+
+  defaultLeaderboard: [
+    { id: "demo-1", name: "NeonFox", streak: 12, reward: 2900, mode: "quick", demo: true },
+    { id: "demo-2", name: "AcePilot", streak: 9, reward: 1400, mode: "classic", demo: true },
+    { id: "demo-3", name: "CardNinja", streak: 7, reward: 850, mode: "quick", demo: true },
+    { id: "demo-4", name: "LuckyByte", streak: 5, reward: 500, mode: "classic", demo: true }
+  ],
+
+  wagerTiers: [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000],
+  // Independently drawn ranks, ties push. Verified with scripts/analyze-economy.mjs
+  // against rank-aware optimal stopping; the GDD's 4.15x fifth streak is unsafe.
+  streakMultipliers: [
+    1.18, 1.40, 1.66, 1.97, 2.33,
+    2.75, 3.26, 3.86, 4.57, 5.41,
+    6.41, 7.59, 8.99, 10.64, 12.60
+  ],
+  insurance: { minimumStreak: 1, costPercent: 0.15, minimumCost: 5 },
+  quickModeSeconds: 5,
+  revealDelayMs: 620,
+  saveKey: "high-low-casino-save-v1"
+});
+</script>
+  <script>/* Offline hybrid-casual progression. No network calls or paid odds. */
+(function(root) {
+  'use strict';
+  const DAY=86400000;
+  const n=v=>Math.max(0,Math.min(1e12,Number(v)||0));
+  const day=now=>new Date(now).toISOString().slice(0,10);
+  const week=now=>{const d=new Date(now);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));return d.toISOString().slice(0,10);};
+  const month=now=>day(now).slice(0,7);
+  const themes=[{id:'aurora',name:'Aurora Nights',color:'#7affcc'},{id:'sunset',name:'Sunset Arcade',color:'#ff976d'},{id:'cosmic',name:'Cosmic Club',color:'#c4a0ff'}];
+  const items=[
+    {id:'fox',kind:'avatar',name:'Neon Fox',value:'🦊'},{id:'robot',kind:'avatar',name:'Byte Bot',value:'🤖'},
+    {id:'cat',kind:'avatar',name:'Cosmic Cat',value:'🐱'},{id:'ghost',kind:'avatar',name:'Ghost',value:'👻'},
+    {id:'alien',kind:'avatar',name:'Visitor',value:'👽'},{id:'panda',kind:'avatar',name:'Panda',value:'🐼'},
+    {id:'cyan',kind:'frame',name:'Electric frame',value:'#33e6e2'},{id:'gold',kind:'frame',name:'Golden frame',value:'#ffca62'},
+    {id:'pink',kind:'frame',name:'Candy frame',value:'#ff4fa2'},{id:'violet',kind:'frame',name:'Orbit frame',value:'#a86cff'},
+    {id:'rookie',kind:'title',name:'Fresh Deck',value:'Fresh Deck'},{id:'reader',kind:'title',name:'Card Reader',value:'Card Reader'},
+    {id:'legend',kind:'title',name:'Main Character',value:'Main Character'},{id:'chill',kind:'title',name:'Chill Dealer',value:'Chill Dealer'},
+    {id:'gg',kind:'emote',name:'Good game',value:'GG ✌'},{id:'fire',kind:'emote',name:'On fire',value:'🔥 Clean call!'},
+    {id:'wow',kind:'emote',name:'Wow',value:'✨ Unreal!'},{id:'cool',kind:'emote',name:'Cool',value:'😎 Smooth!'},
+    {id:'aurora_frame',season:'aurora',kind:'frame',name:'Aurora halo',value:'#7affcc'},
+    {id:'aurora_title',season:'aurora',kind:'title',name:'Night Shift',value:'Night Shift'},
+    {id:'aurora_emote',season:'aurora',kind:'emote',name:'Northern lights',value:'✦ Lights out!'},
+    {id:'sunset_frame',season:'sunset',kind:'frame',name:'Sunset glow',value:'#ff976d'},
+    {id:'sunset_title',season:'sunset',kind:'title',name:'Golden Hour',value:'Golden Hour'},
+    {id:'sunset_emote',season:'sunset',kind:'emote',name:'Golden call',value:'☀ Good call!'},
+    {id:'cosmic_frame',season:'cosmic',kind:'frame',name:'Cosmic orbit',value:'#c4a0ff'},
+    {id:'cosmic_title',season:'cosmic',kind:'title',name:'Star Reader',value:'Star Reader'},
+    {id:'cosmic_emote',season:'cosmic',kind:'emote',name:'Stargazer',value:'★ Out of this world!'}
+  ];
+  const missionPool=[
+    {id:'streak',title:'Reach a 5-card streak',type:'maxStreak',target:5,rewardChips:300,rewardXp:35,icon:'▲'},
+    {id:'runs',title:'Complete 3 runs',type:'runs',target:3,rewardChips:200,rewardXp:25,icon:'↻'},
+    {id:'cash',title:'Cash out 1,000 chips',type:'cashout',target:1000,rewardChips:400,rewardXp:40,icon:'●'},
+    {id:'calls',title:'Make 12 correct calls',type:'correct',target:12,rewardChips:300,rewardXp:35,icon:'✓'},
+    {id:'perfect',title:'Make 2 Perfect Calls',type:'perfect',target:2,rewardChips:250,rewardXp:40,icon:'★'},
+    {id:'lower',title:'Call Lower correctly 5 times',type:'lower',target:5,rewardChips:200,rewardXp:30,icon:'↓'}
+  ];
+  function missions(now){const start=Math.floor(now/DAY)%missionPool.length;return [0,2,4].map(i=>missionPool[(start+i)%missionPool.length]);}
+  function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+  function seededCard(seed,index){let s=hash(seed+':'+index)||1;const rand=max=>{const limit=4294967296-(4294967296%max);do{s^=s<<13;s^=s>>>17;s^=s<<5;s>>>=0;}while(s>=limit);return s%max;};return {rank:2+rand(13),suitIndex:rand(4)};}
+  function encode(record){const data={v:1,seed:record.seed,name:String(record.name||'Friend').slice(0,16),streak:n(record.streak),trace:(record.trace||[]).slice(0,1000),cards:(record.cards||[]).slice(0,1001)};return 'HL1.'+btoa(unescape(encodeURIComponent(JSON.stringify(data))));}
+  function decode(code){if(typeof code!=='string'||code.length>100000||!code.startsWith('HL1.'))throw Error('Paste a valid HL1 challenge code.');let d;try{d=JSON.parse(decodeURIComponent(escape(atob(code.slice(4)))));}catch(_){throw Error('This challenge code is damaged.');}if(d.v!==1||typeof d.seed!=='string'||d.seed.length>120||!Array.isArray(d.trace)||d.trace.length>1000)throw Error('Unsupported challenge code.');let prev=-1;d.trace=d.trace.map(t=>{if(!Array.isArray(t)||t.length!==3||!Number.isFinite(t[0])||t[0]<prev||t[0]>3600000||!['higher','lower'].includes(t[1])||!Number.isInteger(t[2])||t[2]<0||t[2]>1000)throw Error('Invalid ghost replay.');prev=t[0];return t;});if(d.cards && (!Array.isArray(d.cards)||d.cards.length>1001||d.cards.some(c=>!Array.isArray(c)||c.length!==2||!Number.isInteger(c[0])||c[0]<2||c[0]>14||!Number.isInteger(c[1])||c[1]<0||c[1]>3)))throw Error('Invalid card sequence.');return {cards:d.cards||[],v:1,seed:d.seed,name:String(d.name||'Friend').replace(/[<>]/g,'').slice(0,16),streak:Math.min(1000,n(d.streak)),trace:d.trace};}
+  class Hybrid {
+    constructor(save,now=Date.now()){
+      this.save=save;const old=save.hybrid||{};
+      this.h=save.hybrid=Object.assign({version:1,owned:['fox','cyan','rookie','gg'],identity:{avatar:'fox',frame:'cyan',title:'rookie',emote:'gg'},inventory:{time:2,shield:2,auto:2,xp:2,mission:2,key:2},equipped:[],login:{date:'',count:0},lastSeen:now,comebackClaimed:0,week:{id:week(now),scores:[],correct:0,badge:false},season:{id:month(now),points:0,claimed:[]},history:[],dailyBest:{},lastMode:'rush',lastWager:100,perfect:0,settings:{music:false,motion:true},seasonSkins:[],weeklyBadges:[]},old);
+      this.h.inventory=Object.assign({time:2,shield:2,auto:2,xp:2,mission:2,key:2},old.inventory);
+      this.h.identity=Object.assign({avatar:'fox',frame:'cyan',title:'rookie',emote:'gg'},old.identity);
+      this.h.settings=Object.assign({music:false,motion:true},old.settings);
+      ['owned','seasonSkins','weeklyBadges','history','equipped'].forEach(k=>{if(!Array.isArray(this.h[k]))this.h[k]=[];});
+      this.h.inventory=Object.fromEntries(Object.entries(this.h.inventory).map(([k,v])=>[k,n(v)]));
+      this.pending=[];this.rollover(now);
+    }
+    event(type,data){if(typeof window!=='undefined')window.HighLowTelemetry?.record(type,data);}
+    chips(amount,reason){const before=this.save.chips;this.save.chips+=amount;this.event('economy_transaction',{currency:'chips',amount,before,after:this.save.chips,reason});}
+    rollover(now=Date.now()){
+      const h=this.h;
+      if(h.week.id<week(now)){
+        const board=this.weeklyBoard();const place=board.findIndex(s=>s.self)+1;
+        const chips=[0,1500,750,400][place]||0;
+        if(chips){this.chips(chips,'weekly_league');this.pending.push('Weekly league settled: #'+place+' · +'+chips+' chips');}
+        this.event('weekly_reset',{previous:h.week,newWeek:week(now),place,chips});
+        h.week={id:week(now),scores:[],correct:0,badge:false};
+      }
+      if(h.season.id<month(now)){this.event('season_reset',{previous:h.season,newSeason:month(now)});h.season={id:month(now),points:0,claimed:[]};}
+    }
+    theme(now=Date.now()){return themes[(new Date(now).getUTCMonth())%themes.length];}
+    catalog(now=Date.now()){const active=this.theme(now).id;return items.filter(i=>!i.season||i.season===active);}
+    welcome(now=Date.now()){
+      if(now-this.h.lastSeen>=3*DAY&&this.h.comebackClaimed<this.h.lastSeen){this.chips(300,'comeback_reward');this.event('comeback_reward',{chips:300,key:1});this.h.inventory.key++;this.h.comebackClaimed=now;this.pending.push('Welcome back! +300 chips and a cosmetic pack key');}
+      this.h.lastSeen=Math.max(now,this.h.lastSeen);
+    }
+    login(now=Date.now()){
+      if(this.h.login.date>=day(now))return null;
+      const yesterday=day(now-DAY);const next=this.h.login.date===yesterday?(this.h.login.count%7)+1:1;
+      this.h.login={date:day(now),count:next};const chips=[100,150,200,250,300,400,700][next-1];
+      this.chips(chips,'login_journey');this.event('login_reward',{day:next,chips});this.h.inventory.key++;this.h.inventory[['time','shield','auto','xp','mission','key','key'][next-1]]++;
+      return {day:next,chips};
+    }
+    openPack(randomInt,now=Date.now()){if(!this.h.inventory.key)return null;const missing=this.catalog(now).filter(i=>!this.h.owned.includes(i.id));if(!missing.length)return {name:'Current pack complete — key kept'};this.h.inventory.key--;const item=missing[randomInt(missing.length)];this.h.owned.push(item.id);this.event('pack_opened',{item,keys:this.h.inventory.key,season:this.theme(now).id});return item;}
+    equipItem(id){const i=items.find(i=>i.id===id);if(!i||!this.h.owned.includes(id))return false;this.h.identity[i.kind]=id;this.event('cosmetic_equipped',{id,kind:i.kind});return true;}
+    identity(){return Object.fromEntries(Object.entries(this.h.identity).map(([k,id])=>[k,items.find(i=>i.id===id&&this.h.owned.includes(id))||items.find(i=>i.kind===k)]));}
+    toggleBoost(id){if(!['time','shield','auto','xp','mission'].includes(id)||!this.h.inventory[id])return false;const a=this.h.equipped;this.h.equipped=a.includes(id)?a.filter(x=>x!==id):[...a,id];return true;}
+    consumeBoosts(mode){if(['daily','friend'].includes(mode))return [];const b=this.h.equipped.filter(id=>this.h.inventory[id]>0&&(id!=='time'||['rush','quick','weekend'].includes(mode))); b.forEach(id=>this.h.inventory[id]--);this.h.equipped=[];if(b.length)this.event('boosters_consumed',{mode,boosters:b,inventory:this.h.inventory});return b;}
+    complete(record,now=Date.now()){
+      if(this.h.history.some(r=>r.id===record.id))return;
+      this.rollover(now);this.h.history.unshift(record);this.h.history=this.h.history.slice(0,30);
+      if(record.type==='abandoned')return;
+      this.h.season.points+=record.correct+((record.type==='cashout')?3:1);
+      this.h.week.correct+=record.correct;
+      if(this.h.week.correct>=20&&!this.h.week.badge){this.h.week.badge=true;this.h.inventory.key++;this.h.weeklyBadges.push(this.h.week.id);this.pending.push('Weekly badge: Twenty Clean Calls · +1 pack key');}
+      if(record.mode==="weekend"&&record.streak>=5){this.h.inventory.key++;this.pending.push("Weekend Sprint: +1 cosmetic key");}
+      if(record.personalBest){this.h.inventory.key++;this.pending.push('Personal best beaten! +1 cosmetic pack key');}
+      if(record.mode==='daily'){
+        const d=day(now);this.h.dailyBest[d]=Math.max(n(this.h.dailyBest[d]),record.correct);
+        this.h.dailyBest=Object.fromEntries(Object.entries(this.h.dailyBest).sort().slice(-14));
+      }
+      // Weekly best per name, grouped by mode; imported ghosts never count as verified opponents.
+      this.h.week.scores.push({name:record.name,streak:record.streak,reward:record.reward,mode:record.mode,self:true});
+      this.h.week.scores=this.weeklyBoard().slice(0,30);
+    }
+    weeklyBoard(){const m=new Map();for(const s of this.h.week.scores||[]){const key=s.name;const p=m.get(key);if(!p||s.streak>p.streak||(s.streak===p.streak&&s.reward>p.reward))m.set(key,s);}return [...m.values()].sort((a,b)=>b.streak-a.streak||b.reward-a.reward);}
+    league(){const p=this.h.week.correct;return p>=100?'Diamond':p>=50?'Gold':p>=20?'Silver':'Bronze';}
+    claimPass(tier,now=Date.now()){
+      this.rollover(now);if(!Number.isInteger(tier)||tier<1||tier>10||this.h.season.points<tier*15||this.h.season.claimed.includes(tier))return null;
+      this.h.season.claimed.push(tier);this.event('pass_claimed',{season:this.h.season.id,tier});
+      if(tier===10){const id=this.theme(now).id;if(!this.h.seasonSkins.includes(id))this.h.seasonSkins.push(id);return this.theme(now).name+' skin';}
+      this.h.inventory.key++;return '1 cosmetic pack key';
+    }
+  }
+  const api={Hybrid,items,themes,missions,day,week,month,seededCard,encode,decode};
+  if(typeof module==='object'&&module.exports)module.exports=api;else root.HighLowHybrid=api;
+})(typeof window==='object'?window:globalThis);
+</script>
+  <script>/* UI extension: all sharing is initiated by a player button. */
+window.HighLowHybridUI=function(A){
+  'use strict';
+  const {save,hybrid,el}=A,H=HighLowHybrid,h=hybrid.h;
+  const $=id=>document.getElementById(id);
+  const fmt=x=>Math.floor(Number(x)||0).toLocaleString();
+  const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
+  const button=(text,action,cls='hub-button')=>{const b=node('button',text,cls);b.type='button';b.onclick=action;return b;};
+  const append=(parent,...children)=>children.forEach(c=>parent.appendChild(c));
+  const avatarImage=item=>{const img=node('img');img.src=window.HIGH_LOW_ASSETS["avatar-"+item.id+".svg"];img.alt=item.name;img.className='avatar-art';return img;};
+  const rememberedMode=()=>h.lastMode==='weekend'&&![0,6].includes(new Date().getUTCDay())?'rush':h.lastMode;
+  const modeLabels={rush:'30s Rush',classic:'Classic',quick:'Quick · 5s calls',daily:'Daily · 60s',friend:'Friend · 60s',personal:'Personal best',weekend:'Weekend · 30s'};
+  const lead=node('section',undefined,'instant-play');
+  lead.innerHTML='<div class="instant-copy"><span class="eyebrow">ONE THUMB. ONE MORE CARD.</span><h1>Make your call.</h1><p>30 seconds. Your next personal best.</p></div><button id="instantButton" class="primary-button">▶ QUICK PLAY · 30s</button><div class="instant-links"><button id="dailyChallengeButton">Daily 60s</button><button id="customButton">Custom Play</button><button id="hybridHubButton">Your Hub ✦</button></div><p id="quickWager" class="microcopy"></p>';
+  el.menu.prepend(lead);
+  const originalHero=el.menu.querySelector('.hero-copy');if(originalHero)originalHero.hidden=true;
+  const customPanel=el.menu.querySelector('.menu-grid');customPanel.classList.add('custom-closed');
+  const modeBar=el.menu.querySelector('.segmented');
+  const rush=button('Rush · 30s',()=>A.startMode('rush'));modeBar.appendChild(rush);
+  const gameTop=node('div',undefined,'dealer-strip');
+  gameTop.innerHTML='<div id="dealerFace" class="dealer-face" aria-hidden="true"><i></i><i></i><b></b></div><div><small>BYTE · YOUR DEALER</small><p id="dealerSpeech" role="status">Ready when you are.</p></div><strong id="sessionClock"></strong>';
+  el.game.prepend(gameTop);
+  const gesturePad=el.game.querySelector('.card-stage');gesturePad.id='gesturePad';gesturePad.classList.add('gesture-pad');
+  gesturePad.setAttribute('aria-label','Card area: swipe up Higher, down Lower, right Cash Out; hold to protect a prediction');
+  const controls=node('div',undefined,'gesture-controls');
+  controls.innerHTML='<p>Swipe ↑ Higher · ↓ Lower · → Cash out · Hold: shield</p><div id="ghostStatus" role="status"></div><button id="extraTimeButton">+3 seconds</button><button id="emoteButton">Emote</button>';
+  el.game.appendChild(controls);
+  // One accessible native dialog contains the secondary activities.
+  const dialog=node('dialog',undefined,'hybrid-dialog');dialog.id='hybridDialog';
+  dialog.innerHTML='<header><div><small>YOUR SPACE</small><h2 id="hubHeading">Player Hub</h2></div><button id="hubClose" aria-label="Close player hub">×</button></header><nav id="hubTabs" aria-label="Player hub sections"></nav><p id="hubNotice" role="status" class="hub-notice" hidden></p><div id="hubBody"></div>';
+  document.body.appendChild(dialog);
+  let tab='challenges',result=null,lastCode='',shareURL=null,audio=null,musicLoop=null,musicStep=0,lastFocus=null;
+  const tabs=['challenges','locker','collection','pass','league','journey','settings'];
+  tabs.forEach(t=>$('hubTabs').appendChild(button(t[0].toUpperCase()+t.slice(1),()=>{tab=t;drawHub();})));
+  $('hubClose').onclick=()=>dialog.close();dialog.addEventListener('close',()=>lastFocus?.focus());
+  function open(t='challenges'){tab=t;$('hubNotice').hidden=true;lastFocus=document.activeElement;drawHub();if(!dialog.open)dialog.showModal();}
+  $('hybridHubButton').onclick=()=>open();
+  $('instantButton').onclick=()=>{
+    if(save.chips<A.C.wagerTiers[0]&&!['daily','friend'].includes(rememberedMode()))A.startMode('daily');
+    else A.startMode(rememberedMode(),rememberedMode()==='personal'?{target:save.bestStreak+1}:{});
+  };
+  $('dailyChallengeButton').onclick=()=>A.startMode('daily');
+  $('customButton').onclick=()=>{customPanel.classList.toggle('custom-closed');if(!customPanel.classList.contains('custom-closed'))customPanel.scrollIntoView({behavior:'smooth',block:'start'});};
+  $('extraTimeButton').onclick=()=>{if(A.moreTime())A.showToast('Three extra seconds added');};
+  $('emoteButton').onclick=()=>{const identity=hybrid.identity();$('dealerSpeech').textContent=identity.emote.value;A.burstParticles(identity.frame.value,8);};
+  const resultExtras=node('div',undefined,'result-social');
+  resultExtras.innerHTML='<p id="resultExtraSummary"></p><button id="shareResultButton">Share / download result</button><button id="challengeResultButton">Challenge a friend</button>';
+  el.resultModal.querySelector('.modal-card').appendChild(resultExtras);
+  $('shareResultButton').onclick=()=>open('share');
+  $('challengeResultButton').onclick=()=>{if(result){lastCode=H.encode(result);open('challenges');}};
+  function flush(){hybrid.pending.splice(0).forEach(A.showToast);}
+  function render(){
+    hybrid.rollover();flush();
+    const freeFallback=save.chips<A.C.wagerTiers[0]&&!['daily','friend'].includes(rememberedMode());
+    $('quickWager').textContent=freeFallback?'Not enough chips for a paid wager · Daily challenge is free · claim a daily refill when available':'Virtual chips only · Quick wager: '+(A.C.wagerTiers.filter(v=>v<=Math.min(save.chips,100)).pop()||0)+' · Daily challenge is free';
+    $('instantButton').textContent=freeFallback?'▶ PLAY FREE DAILY · 60s':'▶ QUICK PLAY · '+(modeLabels[rememberedMode()]||'30s Rush');
+    const ident=hybrid.identity();el.profileRankIcon.replaceChildren(avatarImage(ident.avatar));el.profileRankIcon.style.borderColor=ident.frame.value;
+    document.body.dataset.season=hybrid.theme().id;
+    document.body.classList.toggle('reduce-effects',!h.settings.motion);
+    if(dialog.open)drawHub();
+    syncMusic();
+  }
+  function notice(text){$('hubNotice').hidden=false;$('hubNotice').textContent=text;}
+  function para(parent,text,cls='hub-note'){parent.appendChild(node('p',text,cls));}
+  function panel(parent,title,text){const p=node('section',undefined,'hub-card');p.appendChild(node('h3',title));if(text)para(p,text);parent.appendChild(p);return p;}
+  function runButton(parent,label,mode,options){parent.appendChild(button(label,()=>{dialog.close();A.startMode(mode,options);}));}
+  function drawHub(){
+    const body=$('hubBody');body.replaceChildren();$('hubHeading').textContent=tab==='share'?'Share your run':'Player Hub';
+    [...$('hubTabs').children].forEach((b,i)=>{b.setAttribute('aria-pressed',String(tabs[i]===tab));});
+    if(tab==='challenges'){
+      const daily=panel(body,'Daily 60-second challenge','Everyone gets the same UTC-dated cards. Wrong calls reset the streak; keep playing for the full minute. Boosters disabled. Repeated attempts replay the same sequence.');
+      para(daily,'Today’s best: '+fmt(h.dailyBest[H.day(Date.now())])+' correct calls');runButton(daily,'Play daily · Free','daily');
+      const personal=panel(body,'Beat yourself','Your target: '+(save.bestStreak+1)+' cards. A new personal best earns a cosmetic key.');runButton(personal,'Personal best run','personal',{target:save.bestStreak+1});
+      const friend=panel(body,'Race a friend’s ghost','Paste a code, then race the recorded calls on the same cards. Codes are unverified player replays.');
+      const input=node('textarea');input.placeholder='HL1.…';input.setAttribute('aria-label','Friend challenge code');input.maxLength=100000;input.value=lastCode;input.oninput=()=>lastCode=input.value;friend.appendChild(input);
+      const msg=node('p','', 'hub-note');friend.appendChild(msg);
+      friend.appendChild(button('Race this ghost · Free',()=>{try{const d=H.decode(input.value.trim());lastCode=input.value.trim();dialog.close();A.startMode('friend',{seed:d.seed,ghost:d,cards:d.cards});}catch(e){msg.textContent=e.message;}}));
+      runButton(friend,'Create a fresh friend challenge','friend');
+      if(lastCode)friend.appendChild(button('Copy challenge code',()=>copy(lastCode)));
+      para(friend,'Imported scores are unverified and may reflect casual boosters. There is no global leaderboard in this offline build. Complete any run to generate a code. On a hosted game, a shared challenge link opens this panel automatically.');
+      const event=panel(body,hybrid.theme().name,'Monthly cosmetic event. Finish the free ten-tier pass before the month ends to keep its exclusive card skin.');
+      const weekend=[0,6].includes(new Date().getUTCDay());para(event,weekend?'Weekend Sprint is live: 30-second runs with +1 cosmetic key for a 5-card finish.':'Weekend Sprint opens Saturday and Sunday (UTC).');
+      if(weekend)runButton(event,'Play Weekend Sprint','weekend');
+      const history=panel(body,'Recent runs','Select a run to challenge its ghost. Best-of-run streak and gross secured chips are shown.');
+      h.history.slice(0,8).forEach(r=>history.appendChild(button(r.name+' · '+r.mode+' · '+r.streak+' cards · '+fmt(r.reward)+' chips',()=>{lastCode=H.encode(r);drawHub();})));
+    }else if(tab==='locker'){
+      const ident=hybrid.identity();const preview=panel(body,save.playerName,ident.title.value+' · '+ident.emote.value);preview.style.borderColor=ident.frame.value;preview.prepend(avatarImage(ident.avatar));
+      ['avatar','frame','title','emote'].forEach(kind=>{const p=panel(body,kind[0].toUpperCase()+kind.slice(1));const list=node('div',undefined,'cosmetic-grid');p.appendChild(list);
+        H.items.filter(i=>i.kind===kind).forEach(i=>{const owned=h.owned.includes(i.id),b=button((i.kind==='frame'?'◉':i.value)+' '+i.name+(owned?'':' · locked'),()=>{if(hybrid.equipItem(i.id))A.persist();});b.disabled=!owned;b.setAttribute('aria-pressed',String(h.identity[kind]===i.id));if(kind==='frame')b.style.borderColor=i.value;if(kind==='avatar')b.prepend(avatarImage(i));list.appendChild(b);});});
+      const boosts=panel(body,'Boosters for your next casual run','Select before starting. Daily and friend challenges have fixed rules and never consume boosters.');
+      const definitions={time:'Extra time: +3s once (Quick / Rush)',shield:'Shield: protects one prediction',auto:'Auto cash-out at streak 3',xp:'Double XP for one run',mission:'Double additive mission progress'};
+      Object.entries(definitions).forEach(([id,title])=>{const b=button(title+' · '+h.inventory[id],()=>{hybrid.toggleBoost(id);A.persist();});b.disabled=!h.inventory[id];b.setAttribute('aria-pressed',String(h.equipped.includes(id)));boosts.appendChild(b);});
+    }else if(tab==='collection'){
+      const catalog=hybrid.catalog();const currentOwned=catalog.filter(i=>h.owned.includes(i.id)).length;
+      const p=panel(body,hybrid.theme().name+' pack',currentOwned+' / '+catalog.length+' current collectibles · '+h.inventory.key+' keys');
+      para(p,'One key opens one unowned base or current-season cosmetic. No duplicates, paid card odds, or recurring key reward for a 3-card streak. Keys are retained when this month’s catalog is complete. Earn keys from daily visits, personal bests and the free pass.');
+      const reveal=node('p','', 'pack-reveal');const b=button('Open a cosmetic pack',()=>{const item=hybrid.openPack(A.randomInt);if(item){A.persist();notice('PACK OPENED · '+item.name+' — equip it in your Locker.');A.burstParticles('#a86cff',20);}});b.disabled=!h.inventory.key||currentOwned>=catalog.length;append(p,b,reveal);
+      const grid=node('div',undefined,'cosmetic-grid');p.appendChild(grid);
+      catalog.forEach(i=>{const owned=h.owned.includes(i.id);const tile=node('div',(owned?i.value:'?')+' · '+i.name+(owned?' · collected':' · locked'),'collection-tile');if(owned)tile.classList.add('owned');if(owned&&i.kind==='avatar')tile.prepend(avatarImage(i));grid.appendChild(tile);});
+      para(p,'Archived seasonal items owned: '+(H.items.filter(i=>i.season&&i.season!==hybrid.theme().id&&h.owned.includes(i.id)).map(i=>i.name).join(', ')||'none'));
+      para(p,'Season skins are separate permanent unlocks. Unlocked: '+(h.seasonSkins.join(', ')||'none yet'));
+    }else if(tab==='pass'){
+      const p=panel(body,hybrid.theme().name+' · Free cosmetic pass','Resets '+nextMonth()+'. 15 points per tier. Correct calls = 1 point; completed cash-outs = 3 extra; other completed runs = 1 extra.');
+      para(p,'Progress: '+fmt(h.season.points)+' points. Every reward is cosmetic. Earned items remain yours after reset.');
+      for(let i=1;i<=10;i++){const claimed=h.season.claimed.includes(i),b=button('Tier '+i+' · '+(i===10?hybrid.theme().name+' card skin':'Cosmetic pack key')+' · '+(claimed?'CLAIMED':i*15+' points'),()=>{const reward=hybrid.claimPass(i);if(reward){A.persist();notice('Pass reward: '+reward);}});b.disabled=claimed||h.season.points<i*15;p.appendChild(b);}
+    }else if(tab==='league'){
+      const p=panel(body,h.week.id+' · '+hybrid.league()+' league','Local weekly board. No live or global opponents. One best score per player name, ordered by streak then secured chips.');
+      para(p,'Weekly correct calls: '+h.week.correct+' · Bronze 0 / Silver 20 / Gold 50 / Diamond 100');
+      const rows=hybrid.weeklyBoard();if(!rows.length)para(p,'Complete a run to enter this week’s board.');
+      rows.slice(0,10).forEach((r,i)=>para(p,(i+1)+'. '+r.name+' — '+r.streak+' cards · '+fmt(r.reward)+' chips · '+r.mode));
+      para(p,'On the first visit after Monday 00:00 UTC, the best local player placement pays once: #1 1,500 / #2 750 / #3 400 chips. Names share this browser’s wallet.');
+      para(p,'Weekly badge: Twenty Clean Calls — '+Math.min(20,h.week.correct)+'/20'+(h.week.badge?' · earned':' · earns one pack key'));
+      para(p,'Weekly badges collected: '+h.weeklyBadges.length);
+    }else if(tab==='journey'){
+      const p=panel(body,'Seven-day login journey','Claim once per UTC day. Consecutive visits advance the journey; a missed day restarts it. No purchases required.');
+      const chips=[100,150,200,250,300,400,700];const grid=node('div',undefined,'journey-grid');p.appendChild(grid);
+      chips.forEach((v,i)=>grid.appendChild(node('div','Day '+(i+1)+' · '+v+' chips + key'+(h.login.count===i+1?' ◀':''),'collection-tile')));
+      const claim=button('Claim today’s journey reward',()=>{const r=hybrid.login();if(r){A.persist();notice('Day '+r.day+': +'+r.chips+' chips, a key and booster');}});claim.disabled=h.login.date>=H.day(Date.now());p.appendChild(claim);
+      para(p,'Return after three days away for 300 chips and one cosmetic key. This is credited automatically on your next visit.');
+    }else if(tab==='settings'){
+      const p=panel(body,'Make it yours');
+      const music=button('Adaptive music: '+(h.settings.music?'ON':'OFF'),()=>{h.settings.music=!h.settings.music;A.persist();syncMusic();});p.appendChild(music);
+      p.appendChild(button('Motion effects: '+(h.settings.motion?'ON':'OFF'),()=>{h.settings.motion=!h.settings.motion;A.persist();}));
+      para(p,'Sound effects use the ♪ button. Device reduced-motion preferences are respected.');
+      para(p,'Card rules: 2 is lowest, Ace highest, ties preserve your streak. Normal modes independently draw one of 52 cards with replacement. The live odds describe the next draw, not your eventual payout. Daily and friend modes replay fixed sequences. Cosmetics, purchases and past losses never improve odds.');
+      para(p,'Insurance covers one prediction, including a tie. Perfect Call XP rewards a correct direction with less than 6/13 chance. At streak 15 the celebration is cosmetic; multipliers remain capped at the configured maximum.');
+      para(p,'All progress and rankings live in this browser. Clearing browser data removes them.');
+    }else if(tab==='share')drawShare(body);
+  }
+  function nextMonth(){const d=new Date();return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)).toISOString().slice(0,10);}
+  async function copy(text){try{await navigator.clipboard.writeText(text);notice('Copied');}catch(_){notice('Select the code or caption and copy it manually.');}}
+  function caption(){return result?`${result.name} reached ${result.streak} cards and secured ${fmt(result.reward)} chips in High Low. Can you beat my streak?`:'';}
+  function challengeLink(){const base=window.HIGH_LOW_GOOGLE_BOOT?.url||(location.protocol.startsWith('http')?location.origin+location.pathname:'');return base?base+(window.HIGH_LOW_GOOGLE_BOOT?'?challenge=':'#challenge=')+encodeURIComponent(H.encode(result)):'';}
+  async function paintResult(canvas){
+    canvas.width=1080;canvas.height=1920;const c=canvas.getContext('2d');const i=result.identity||hybrid.identity();
+    const g=c.createLinearGradient(0,0,1080,1920);g.addColorStop(0,'#080d22');g.addColorStop(1,'#34205a');c.fillStyle=g;c.fillRect(0,0,1080,1920);
+    c.strokeStyle=i.frame.value;c.lineWidth=8;c.strokeRect(54,54,972,1812);
+    c.textAlign='center';function text(t,y,size,color='#f5f7ff'){c.fillStyle=color;c.font=`bold ${size}px system-ui, sans-serif`;c.fillText(t,540,y,930);}
+    text('HIGH LOW',190,65,'#33e6e2');text(result.name,505,68);text(i.title.value,566,30,i.frame.value);
+    text(result.streak+'',900,230);text('BEST STREAK',966,36,'#b9c2dd');text(fmt(result.reward)+' CHIPS SECURED',1120,48,'#ffca62');
+    text('Level '+result.level+' · '+result.rank,1240,34);text(result.skin.toUpperCase()+' DECK · '+result.mode.toUpperCase(),1320,28,'#b9c2dd');
+    text('CAN YOU BEAT MY STREAK?',1530,43,'#33e6e2');text('Virtual chips · Local player result',1710,27,'#b9c2dd');
+    const url=window.HIGH_LOW_GOOGLE_BOOT?.url||(location.protocol.startsWith('http')?location.origin+location.pathname:'Open the HTML5 game to play');text(url,1775,22,'#b9c2dd');
+    const avatar=new Image();await new Promise(resolve=>{avatar.onload=()=>{c.drawImage(avatar,460,260,160,160);resolve();};avatar.onerror=()=>{text(i.avatar.name,360,35);resolve();};avatar.src=window.HIGH_LOW_ASSETS["avatar-"+i.avatar.id+".svg"];});
+  }
+  function drawShare(body){
+    if(!result){para(body,'Complete a run first.');return;}
+    const canvas=node('canvas');canvas.className='share-canvas';canvas.setAttribute('aria-label','Your vertical story result card');body.appendChild(canvas);const painted=paintResult(canvas);
+    const cap=node('textarea');cap.value=caption();cap.readOnly=true;cap.setAttribute('aria-label','Result caption');body.appendChild(cap);
+    body.appendChild(button('Download story PNG · Instagram / Discord',async()=>{await painted;const a=node('a');a.download='High_Low_Result.png';a.href=canvas.toDataURL('image/png');a.click();}));
+    body.appendChild(button('Share image via device apps',async()=>{
+      try{await painted;const blob=await new Promise(resolve=>canvas.toBlob(resolve));const file=new File([blob],'High_Low_Result.png',{type:'image/png'});
+        if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:'High Low',text:caption()});}
+        else if(navigator.share)await navigator.share({title:'High Low',text:caption(),...(challengeLink()?{url:challengeLink()}: {})});
+        else notice('Download the image and paste the caption into your chosen app.');
+      }catch(e){if(e.name!=='AbortError')notice('Sharing unavailable. Download the image instead.');}
+    }));
+    body.appendChild(button('Copy caption',()=>copy(caption())));
+    ['WhatsApp','Telegram','X'].forEach(platform=>body.appendChild(button('Share to '+platform,()=>{
+      const text=caption()+' '+challengeLink();let url=platform==='WhatsApp'?'https://wa.me/?text='+encodeURIComponent(text):platform==='Telegram'?'https://t.me/share/url?url='+encodeURIComponent(challengeLink())+'&text='+encodeURIComponent(caption()):'https://twitter.com/intent/tweet?text='+encodeURIComponent(text);
+      window.open(url,'_blank','noopener,noreferrer');
+    })));
+    para(body,'Instagram Stories and Discord: download the PNG, then upload it in the app. Native sharing shows only apps supported by your device.');
+  }
+  const reactions={start:['Let’s find your rhythm.','One call at a time.'],correct:['Clean call!','Smooth!','You read that.'],perfect:['PERFECT CALL ✦','Small odds. Clean read.'],record:['NEW PERSONAL BEST!'],comeback:['COMEBACK CALL!','Back in rhythm!'],loss:['Good run. Take a breath.','Next round, fresh cards.'],tie:['Same rank. Streak safe.'],shield:['Shield did its thing.'],cashout:['Secured. Nice call.'],chest:['Milestone unlocked!'],legend:['LEGEND RUN ★']};
+  function react(type,r){if(r?.streak===15)type='legend';const list=reactions[type]||reactions.correct;$('dealerSpeech').textContent=list[Math.floor(Math.random()*list.length)];$('dealerFace').dataset.mood=type;gameTop.classList.remove('call-celebration');if(['perfect','comeback','legend'].includes(type)){void gameTop.offsetWidth;gameTop.classList.add('call-celebration');}syncMusic();}
+  function atmosphere(r){document.body.dataset.heat=String(r.streak>=11?4:r.streak>=8?3:r.streak>=5?2:r.streak>=3?1:0);}
+  function tick(r){
+    $('sessionClock').textContent=r.deadline?Math.max(0,Math.ceil((r.deadline-Date.now())/1000))+'s':'';
+    const target=r.ghost;let text=r.target?'Beat your best: '+r.streak+' / '+r.target:'';
+    if(target){const elapsed=Date.now()-r.startedAt;const point=[...target.trace].reverse().find(t=>t[0]<=elapsed);text=target.name+' ghost: '+(point?point[2]:0)+' cards · you: '+r.streak;}
+    if(r.mode==='daily')text='DAILY · '+r.correct+' correct calls · best streak '+r.maxStreak;
+    $('ghostStatus').textContent=text;
+    $('extraTimeButton').hidden=!r.boosts.includes('time')||r.timeUsed||r.practice||!['quick','rush','weekend'].includes(r.mode);
+  }
+  // Gesture capture is limited to the cards. The rest of the page remains scrollable.
+  let pointer=null,holdTimer=null;
+  gesturePad.addEventListener('pointerdown',e=>{if(A.isBusy()||A.isModal()||!A.getRun()||A.getRun().ended)return;pointer={id:e.pointerId,x:e.clientX,y:e.clientY,held:false};gesturePad.setPointerCapture?.(e.pointerId);holdTimer=setTimeout(()=>{if(pointer){pointer.held=true;window.HighLowTelemetry?.record('gesture_action',{action:'insurance_hold'},A.getRun()?.id);A.activateInsurance();}},600);});
+  gesturePad.addEventListener('pointermove',e=>{if(pointer&&Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>15)clearTimeout(holdTimer);});
+  gesturePad.addEventListener('pointerup',e=>{clearTimeout(holdTimer);if(!pointer||pointer.id!==e.pointerId)return;const p=pointer;pointer=null;if(p.held)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.max(Math.abs(dx),Math.abs(dy))<45)return;if(dx>Math.abs(dy)){window.HighLowTelemetry?.record('gesture_action',{action:'cashout_swipe'},A.getRun()?.id);A.cashOut();}else if(Math.abs(dy)>Math.abs(dx)){window.HighLowTelemetry?.record('gesture_action',{action:dy<0?'higher_swipe':'lower_swipe'},A.getRun()?.id);A.predict(dy<0?'higher':'lower');}});
+  gesturePad.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);pointer=null;});
+  function syncMusic(){
+    const r=A.getRun();if(!h.settings.music||!save.sound||!r||r.ended){clearInterval(musicLoop);musicLoop=null;return;}
+    if(musicLoop)return;
+    try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();musicLoop=setInterval(()=>{
+      const r=A.getRun();if(!r||r.ended||!save.sound||!h.settings.music){syncMusic();return;}
+      const notes=[130.81,164.81,196,261.63];const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=notes[musicStep++%4]*(r.streak>=8?2:r.streak>=5?1.5:1);g.gain.setValueAtTime(.018,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.3);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.31);
+    },320);}catch(_){/* Sound is optional. */}
+  }
+  function onResult(r){result=r;lastCode=H.encode(r);syncMusic();$('resultExtraSummary').textContent=r.correct+' clean calls · milestone chests grant XP only'+(r.personalBest?' · NEW BEST':'');}
+  // The URL contains player-shared data only; decode validates it before use.
+  if(window.HIGH_LOW_GOOGLE_BOOT?.challenge||location.hash?.startsWith('#challenge=')){try{lastCode=window.HIGH_LOW_GOOGLE_BOOT?.challenge||decodeURIComponent(location.hash.slice(11));H.decode(lastCode);setTimeout(()=>open('challenges'),50);}catch(_){A.showToast('Invalid challenge link.');}}
+  setInterval(()=>{hybrid.rollover();hybrid.h.lastSeen=Date.now();A.persist();},60000);
+  return {render,flush,react,atmosphere,tick,result:onResult,isOpen:()=>dialog.open};
+};
+</script>
+  <script>(function () {
+  "use strict";
+
+  const C = window.HIGH_LOW_CONFIG;
+  const telemetry=window.HighLowTelemetry||{record(){},snapshot(){},progress(){},attach(){}};
+  function track(type,data={},runId=run?.id){telemetry.record(type,data,runId);}
+  function changeChips(amount,reason,detail={}){const before=save.chips;save.chips+=amount;track('economy_transaction',{currency:'chips',amount,before,after:save.chips,reason,...detail},detail.runId||run?.id);}
+  const suits = [
+    { symbol: "♣", name: "clubs", red: false },
+    { symbol: "♦", name: "diamonds", red: true },
+    { symbol: "♥", name: "hearts", red: true },
+    { symbol: "♠", name: "spades", red: false }
+  ];
+  const rankNames = { 11: "J", 12: "Q", 13: "K", 14: "A" };
+  const $ = id => document.getElementById(id);
+
+  const el = {
+    menu: $("menuScreen"), game: $("gameScreen"), chips: $("headerChips"),
+    wagerButtons: $("wagerButtons"), skinPicker: $("skinPicker"), deal: $("dealButton"), menuMessage: $("menuMessage"),
+    best: $("bestStreak"), runs: $("runsPlayed"), daily: $("dailyRewardButton"), dailyText: $("dailyRewardText"),
+    leaderboardButton: $("leaderboardButton"), addCoins: $("addCoinsButton"), home: $("homeButton"), sound: $("soundButton"),
+    profileButton: $("profileButton"), profileRankIcon: $("profileRankIcon"), profileRankName: $("profileRankName"),
+    profileLevel: $("profileLevel"), profileXpText: $("profileXpText"), profileXpBar: $("profileXpBar"),
+    dailyMissionList: $("dailyMissionList"), missionsComplete: $("missionsComplete"),
+    hudWager: $("hudWager"), hudStreak: $("hudStreak"), hudMultiplier: $("hudMultiplier"), hudCashout: $("hudCashout"),
+    prompt: $("gamePrompt"), currentCard: $("currentCard"), nextCard: $("nextCard"),
+    lower: $("lowerButton"), higher: $("higherButton"), edgeHint: $("edgeHint"), oddsHint: $("oddsHint"),
+    insurance: $("insuranceButton"), insuranceCost: $("insuranceCost"), cashout: $("cashoutButton"), cashoutValue: $("cashoutButtonValue"),
+    timerWrap: $("timerWrap"), timerBar: $("timerBar"), comboText: $("comboText"), comboBar: $("comboBar"), nextChestText: $("nextChestText"),
+    toast: $("toast"), fxLayer: $("fxLayer"), resultModal: $("resultModal"),
+    resultKicker: $("resultKicker"), resultTitle: $("resultTitle"), resultMessage: $("resultMessage"),
+    resultStreak: $("resultStreak"), resultReward: $("resultReward"), resultXp: $("resultXp"),
+    playAgain: $("playAgainButton"), resultHome: $("resultHomeButton"), resultLeaderboard: $("resultLeaderboardButton"),
+    leaderboardModal: $("leaderboardModal"), leaderboardRows: $("leaderboardRows"), leaderboardRewards: $("leaderboardRewards"),
+    closeLeaderboard: $("closeLeaderboardButton"), playerName: $("playerNameInput"), saveName: $("saveNameButton"),
+    profileModal: $("profileModal"), closeProfile: $("closeProfileButton"), modalRankIcon: $("modalRankIcon"),
+    modalRankName: $("modalRankName"), modalLevel: $("modalLevel"), modalNextRank: $("modalNextRank"), addXp: $("addXpButton"),
+    statWinRate: $("statWinRate"), statAverageStreak: $("statAverageStreak"), statHighestReward: $("statHighestReward"),
+    statPredictions: $("statPredictions"), achievementGrid: $("achievementGrid"), badgeCount: $("badgeCount"),
+    chestModal: $("chestModal"), chestStreak: $("chestStreak"), chestXp: $("chestXp"),
+    collectChest: $("collectChestButton")
+  };
+
+  const emptyStats = {
+    totalRuns: 0, correct: 0, incorrect: 0, ties: 0, totalPredictions: 0,
+    totalStreak: 0, cashouts: 0, highestReward: 0, totalRewards: 0
+  };
+  const defaultSave = {
+    progressRevision: 0,
+    chips: C.startingChips,
+    bestStreak: 0,
+    runsPlayed: 0,
+    lastDailyReward: 0,
+    sound: true,
+    cardSkin: "neon",
+    playerName: C.defaultPlayerName,
+    totalXp: 0,
+    stats: { ...emptyStats },
+    achievements: {},
+    leaderboardRewardsClaimed: {},
+    dailyMissions: null,
+    leaderboard: C.defaultLeaderboard.map(entry => ({ ...entry }))
+  };
+
+  let save = loadSave();
+  const hybrid = new HighLowHybrid.Hybrid(save);
+  let extraUI = null;
+  let pendingOptions = {};
+  let activeClock = null;
+  let lastResult = null;
+  let resultDelay = null;
+  let selectedWager = 100;
+  let selectedMode = ["classic","quick","rush"].includes(hybrid.h.lastMode) ? hybrid.h.lastMode : "rush";
+  let run = null;
+  let busy = false;
+  let timerId = null;
+  let audioContext = null;
+  let toastTimer = null;
+  let showingToast = false;
+  let toastQueue = [];
+  let lastCommittedState = "";
+
+  function loadSave() {
+    let parsed = {};
+    try { parsed = JSON.parse(localStorage.getItem(C.saveKey)) || {}; } catch (_) { parsed = {}; }
+    const data = Object.assign({}, defaultSave, parsed);
+    data.progressRevision = Number.isSafeInteger(parsed.progressRevision) && parsed.progressRevision >= 0 ? parsed.progressRevision : 0;
+    data.stats = Object.assign({}, emptyStats, parsed.stats || {});
+    data.achievements = Object.assign({}, parsed.achievements || {});
+    data.leaderboardRewardsClaimed = Object.assign({}, parsed.leaderboardRewardsClaimed || {});
+    data.leaderboard = Array.isArray(parsed.leaderboard) ? parsed.leaderboard : C.defaultLeaderboard.map(entry => ({ ...entry }));
+    data.totalXp = Math.max(0, Number(parsed.totalXp) || 0);
+    data.playerName = cleanPlayerName(parsed.playerName || C.defaultPlayerName);
+    ensureDailyMissions(data);
+    const skin = C.cardSkins.find(item => item.id === data.cardSkin);
+    if (!skin || (skin.unlockLevel > levelFromXp(data.totalXp) && !(data.hybrid?.seasonSkins || []).includes(skin.id))) data.cardSkin = "neon";
+    return data;
+  }
+
+  function persist() {
+    renderPersistentUI();
+    try {
+      const state = JSON.stringify(save, (key, value) => key === "progressRevision" ? undefined : value);
+      if (state !== lastCommittedState) {
+        if (save.progressRevision >= Number.MAX_SAFE_INTEGER) throw Error("Progress revision exhausted");
+        save.progressRevision += 1;
+        localStorage.setItem(C.saveKey, JSON.stringify(save));
+        lastCommittedState = state;
+        const level = levelFromXp(save.totalXp);
+        telemetry.progress(save, level, rankForLevel(level).name);
+      }
+    } catch (_) {
+      track("save_error",{message:"Browser storage unavailable"});
+      el.menuMessage.textContent = "Browser storage is unavailable. Progress will last for this session only.";
+    }
+    telemetry.snapshot(save,run,levelFromXp(save.totalXp),rankForLevel(levelFromXp(save.totalXp)).name);
+  }
+
+  function format(value) { return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("en-US"); }
+  function rankLabel(rank) { return rankNames[rank] || String(rank); }
+  function dateKey() { return HighLowHybrid.day(Date.now()); }
+  function missionDefinitions() { return HighLowHybrid.missions(Date.parse((save.dailyMissions?.date || dateKey())+"T12:00:00Z")); }
+  function cleanPlayerName(value) {
+    const cleaned = String(value || "").replace(/[^a-zA-Z0-9 _-]/g, "").trim().slice(0, 16);
+    return cleaned || C.defaultPlayerName;
+  }
+
+  function xpNeededForLevel(level) {
+    return C.xp.basePerLevel + (level - 1) * C.xp.growthPerLevel;
+  }
+
+  function totalXpAtLevel(level) {
+    let total = 0;
+    for (let current = 1; current < level; current += 1) total += xpNeededForLevel(current);
+    return total;
+  }
+
+  function levelFromXp(totalXp) {
+    let level = 1;
+    let remaining = Math.max(0, totalXp);
+    while (level < C.xp.maxLevel && remaining >= xpNeededForLevel(level)) {
+      remaining -= xpNeededForLevel(level);
+      level += 1;
+    }
+    return level;
+  }
+
+  function levelProgress() {
+    const level = levelFromXp(save.totalXp);
+    if (level >= C.xp.maxLevel) return { level, current: 0, needed: 0, percent: 100 };
+    const start = totalXpAtLevel(level);
+    const current = save.totalXp - start;
+    const needed = xpNeededForLevel(level);
+    return { level, current, needed, percent: Math.min(100, current / needed * 100) };
+  }
+
+  function rankForLevel(level) {
+    return [...C.ranks].reverse().find(rank => level >= rank.minLevel) || C.ranks[0];
+  }
+
+  function nextRankForLevel(level) {
+    return C.ranks.find(rank => rank.minLevel > level) || null;
+  }
+
+  function grantXp(amount, countForRun) {
+    const value = Math.max(0, Math.floor(amount * (countForRun && run?.boosts?.includes("xp") ? 2 : 1)));
+    if (!value) return;
+    const oldLevel = levelFromXp(save.totalXp);
+    save.totalXp += value;
+    track("xp_granted",{amount:value,totalXp:save.totalXp,runAssociated:Boolean(countForRun)});
+    if (countForRun && run) run.xpEarned += value;
+    const newLevel = levelFromXp(save.totalXp);
+    if (newLevel > oldLevel) {
+      track("level_up",{oldLevel,newLevel,rank:rankForLevel(newLevel).name});
+      const unlocked = C.cardSkins.filter(skin => skin.unlockLevel > oldLevel && skin.unlockLevel <= newLevel);
+      showToast("Level " + newLevel + " reached" + (unlocked.length ? " — " + unlocked.map(skin => skin.name).join(", ") + " skin unlocked" : "!"));
+      burstParticles("#ffca62", 26);
+    }
+  }
+
+  function ensureDailyMissions(data) {
+    const today = dateKey();
+    if (!data.dailyMissions || data.dailyMissions.date < today) {
+      data.dailyMissions = { date: today, progress: {}, claimed: {} };
+      HighLowHybrid.missions(Date.now()).forEach(mission => { data.dailyMissions.progress[mission.id] = 0; });
+    }
+  }
+
+  function updateDailyMission(type, value) {
+    ensureDailyMissions(save);
+    if (run?.boosts?.includes("mission") && type !== "maxStreak") value *= 2;
+    missionDefinitions().filter(mission => mission.type === type).forEach(mission => {
+      const current = Number(save.dailyMissions.progress[mission.id]) || 0;
+      save.dailyMissions.progress[mission.id] = type === "maxStreak" ? Math.max(current, value) : current + value;
+      track("mission_progress",{id:mission.id,day:save.dailyMissions.date,progress:save.dailyMissions.progress[mission.id],target:mission.target});
+      if (save.dailyMissions.progress[mission.id] >= mission.target && !save.dailyMissions.claimed[mission.id]) {
+        save.dailyMissions.claimed[mission.id] = true;
+        changeChips(mission.rewardChips,"daily_mission",{missionId:mission.id});
+        track("mission_completed",{id:mission.id,day:save.dailyMissions.date,rewardChips:mission.rewardChips,rewardXp:mission.rewardXp});
+        grantXp(mission.rewardXp, Boolean(run));
+        showToast("Mission complete: +" + format(mission.rewardChips) + " chips and +" + mission.rewardXp + " XP");
+        burstParticles("#a86cff", 18);
+      }
+    });
+  }
+
+  function checkAchievements() {
+    const level = levelFromXp(save.totalXp);
+    const conditions = {
+      first_cashout: save.stats.cashouts >= 1,
+      streak_5: save.bestStreak >= 5,
+      streak_10: save.bestStreak >= 10,
+      reward_5000: save.stats.highestReward >= 5000,
+      runs_25: save.stats.totalRuns >= 25,
+      level_10: level >= 10,
+      level_30: level >= 30,
+      predictions_100: save.stats.totalPredictions >= 100
+    };
+    C.achievements.forEach(achievement => {
+      if (conditions[achievement.id] && !save.achievements[achievement.id]) {
+        save.achievements[achievement.id] = Date.now();
+        track("achievement_unlocked",{id:achievement.id,title:achievement.title});
+        showToast("Badge unlocked: " + achievement.title);
+        burstParticles("#ffca62", 16);
+      }
+    });
+  }
+
+  function secureRandomInt(max) {
+    if (window.crypto && window.crypto.getRandomValues) {
+      const range = 0x100000000;
+      const limit = range - (range % max);
+      const values = new Uint32Array(1);
+      do { window.crypto.getRandomValues(values); } while (values[0] >= limit);
+      return values[0] % max;
+    }
+    return Math.floor(Math.random() * max);
+  }
+
+  function randomCard() {
+    return { rank: 2 + secureRandomInt(13), suit: suits[secureRandomInt(4)] };
+  }
+
+  function currentSkin() {
+    const level = levelFromXp(save.totalXp);
+    return C.cardSkins.find(skin => skin.id === save.cardSkin && (skin.unlockLevel <= level || hybrid.h.seasonSkins.includes(skin.id))) || C.cardSkins[0];
+  }
+
+  function renderCard(node, card, extraClass) {
+    node.className = "playing-card skin-" + currentSkin().id + (card.suit.red ? " red" : "") + (extraClass ? " " + extraClass : "");
+    node.dataset.rank = rankLabel(card.rank);
+    node.dataset.suit = card.suit.symbol;
+    node.setAttribute("aria-label", rankLabel(card.rank) + " of " + card.suit.name);
+    node.innerHTML = '<span class="center-suit">' + card.suit.symbol + "</span>";
+  }
+
+  function renderBack() {
+    const skin = currentSkin();
+    el.nextCard.className = "playing-card card-back skin-" + skin.id;
+    el.nextCard.removeAttribute("data-rank");
+    el.nextCard.removeAttribute("data-suit");
+    el.nextCard.setAttribute("aria-label", "Hidden next card");
+    el.nextCard.innerHTML = '<img src="' + skin.backAsset + '" alt="' + skin.name + ' card back">';
+  }
+
+  function renderPersistentUI() {
+    ensureDailyMissions(save);
+    const progress = levelProgress();
+    const rank = rankForLevel(progress.level);
+    el.chips.textContent = format(save.chips);
+    el.best.textContent = format(save.bestStreak);
+    el.runs.textContent = format(save.runsPlayed);
+    el.sound.textContent = save.sound ? "♪" : "×";
+    el.sound.setAttribute("aria-label", save.sound ? "Mute sound" : "Enable sound");
+    el.profileRankIcon.textContent = rank.icon;
+    el.profileRankName.textContent = rank.name.toUpperCase();
+    el.profileLevel.textContent = progress.level;
+    el.profileXpText.textContent = progress.level >= C.xp.maxLevel ? "MAX LEVEL" : format(progress.current) + " / " + format(progress.needed);
+    el.profileXpBar.style.width = progress.percent + "%";
+    updateDailyReward();
+    buildWagers();
+    buildSkinPicker();
+    renderDailyMissions();
+    if (extraUI) extraUI.render();
+  }
+
+  function buildSkinPicker() {
+    const level = levelFromXp(save.totalXp);
+    el.skinPicker.innerHTML = "";
+    C.cardSkins.forEach(skin => {
+      const locked = level < skin.unlockLevel && !hybrid.h.seasonSkins.includes(skin.id);
+      const active = skin.id === currentSkin().id;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "skin-option" + (active ? " active" : "") + (locked ? " locked" : "");
+      button.dataset.level = skin.seasonal ? "SEASON PASS" : "LV " + skin.unlockLevel;
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", active ? "true" : "false");
+      button.setAttribute("aria-disabled", locked ? "true" : "false");
+      button.setAttribute("aria-label", skin.name + " card skin" + (locked ? ", unlocks at level " + skin.unlockLevel : ""));
+      button.innerHTML = '<span class="skin-swatch ' + skin.id + '"></span><b>' + skin.name + "</b>";
+      button.addEventListener("click", () => {
+        if (locked) { showToast(skin.seasonal ? "Earn this skin at tier 10 of its seasonal pass." : skin.name + " unlocks at level " + skin.unlockLevel); return; }
+        save.cardSkin = skin.id;
+        track("skin_selected",{id:skin.id});
+        persist();
+        tone(520, .06);
+        showToast(skin.name + " card skin selected");
+      });
+      el.skinPicker.appendChild(button);
+    });
+  }
+
+  function buildWagers() {
+    el.wagerButtons.innerHTML = "";
+    C.wagerTiers.forEach(amount => {
+      const button = document.createElement("button");
+      button.className = "wager-btn" + (amount === selectedWager ? " active" : "");
+      button.textContent = format(amount);
+      button.disabled = amount > save.chips;
+      button.addEventListener("click", () => {
+        selectedWager = amount;
+        buildWagers();
+        el.menuMessage.textContent = "";
+        tone(440, .05);
+      });
+      el.wagerButtons.appendChild(button);
+    });
+    if (selectedWager > save.chips) {
+      const affordable = C.wagerTiers.filter(value => value <= save.chips);
+      selectedWager = affordable.length ? affordable[Math.min(2, affordable.length - 1)] : C.wagerTiers[0];
+      if (affordable.length) buildWagers();
+    }
+  }
+
+  function renderDailyMissions() {
+    ensureDailyMissions(save);
+    el.dailyMissionList.innerHTML = "";
+    let complete = 0;
+    missionDefinitions().forEach(mission => {
+      const progress = Math.min(mission.target, Number(save.dailyMissions.progress[mission.id]) || 0);
+      const claimed = Boolean(save.dailyMissions.claimed[mission.id]);
+      if (claimed) complete += 1;
+      const card = document.createElement("div");
+      card.className = "mission-card" + (claimed ? " complete" : "");
+      card.innerHTML = '<div class="mission-card-head"><span>' + (claimed ? "✓" : mission.icon) + "</span><span><b>" + mission.title + "</b><small>" +
+        format(progress) + " / " + format(mission.target) + '</small></span><span class="mission-reward">+' + format(mission.rewardChips) +
+        '</span></div><div class="progress-track"><i style="width:' + Math.min(100, progress / mission.target * 100) + '%"></i></div>';
+      el.dailyMissionList.appendChild(card);
+    });
+    el.missionsComplete.textContent = complete + " / " + missionDefinitions().length + " COMPLETE";
+  }
+
+  function updateDailyReward() {
+    const wait = C.dailyRewardCooldownHours * 60 * 60 * 1000;
+    const remaining = save.lastDailyReward + wait - Date.now();
+    if (remaining <= 0) {
+      el.daily.disabled = false;
+      el.dailyText.textContent = "Claim " + format(C.dailyReward) + " free chips";
+    } else {
+      el.daily.disabled = true;
+      const hours = Math.floor(remaining / 3600000);
+      const minutes = Math.ceil((remaining % 3600000) / 60000);
+      el.dailyText.textContent = "Next drop in " + hours + "h " + minutes + "m";
+    }
+  }
+
+  function switchScreen(name) {
+    el.menu.classList.toggle("active", name === "menu");
+    el.game.classList.toggle("active", name === "game");
+  }
+
+  function startRun() {
+    if (run && !run.ended) return;
+    clearTimeout(resultDelay);
+    const practice = ["daily","friend"].includes(selectedMode);
+    if (practice) selectedWager = 100;
+    if (!practice && selectedWager > save.chips) {
+      el.menuMessage.textContent = "You do not have enough chips for this wager.";
+      return;
+    }
+    closeResult();
+    busy = false;
+    const newRunId="run-"+(globalThis.crypto?.randomUUID?.()||Date.now()+"-"+Math.random().toString(36).slice(2));
+    if (!practice) changeChips(-selectedWager,"run_entry",{mode:selectedMode,runId:newRunId});
+    hybrid.h.lastMode = selectedMode;
+    hybrid.h.lastWager = selectedWager;
+    const seed = pendingOptions.seed || (selectedMode === "daily" ? "daily-v1:"+dateKey() : "run:"+Date.now()+":"+secureRandomInt(0x7fffffff));
+    run = {
+      id: newRunId, wager: selectedWager, streak: 0, maxStreak: 0, correct:0, cashout: 0,
+      card: null, insurance: false, ended: false, mode: selectedMode,
+      xpEarned: 0, claimedChests: [], seed, cards:[], replayCards:pendingOptions.cards||[], drawIndex:0, startedAt:Date.now(), trace:[],
+      boosts:hybrid.consumeBoosts(selectedMode), practice, ghost:pendingOptions.ghost || null,
+      target:pendingOptions.target || 0, personalBest:save.bestStreak, deadline:0, timeUsed:false
+    };
+    run.card = drawRunCard();
+    track("run_started",{mode:run.mode,wager:run.practice?0:run.wager,initialCard:run.card,seed:run.seed,boosters:run.boosts,ghost:run.ghost});
+    run.insurance = run.boosts.includes("shield");
+    run.deadline = ["rush","weekend"].includes(run.mode) ? Date.now()+30000 : ["daily","friend"].includes(run.mode) ? Date.now()+60000 : 0;
+    pendingOptions={};
+    clearInterval(activeClock);
+    activeClock=setInterval(tickRun,100);
+    persist();
+    el.hudWager.textContent = format(run.wager);
+    renderCard(el.currentCard, run.card);
+    renderBack();
+    switchScreen("game");
+    setPrompt("Will the next card be higher or lower?");
+    updateRunUI();
+    tone(260, .08);
+    startDecisionTimer();
+    if(extraUI) extraUI.react("start",run);
+  }
+
+  function drawRunCard() {
+    let card;
+    if(run.replayCards[run.drawIndex]) {const c=run.replayCards[run.drawIndex];card={rank:c[0],suit:suits[c[1]]};run.drawIndex++;}
+    else if (!run.practice) {run.drawIndex++;card=randomCard();}
+    else {const raw=HighLowHybrid.seededCard(run.seed,run.drawIndex++);card={rank:raw.rank,suit:suits[raw.suitIndex]};}
+    run.cards.push([card.rank,suits.findIndex(s=>s.name===card.suit.name)]);return card;
+  }
+
+  function tickRun() {
+    if (!run || run.ended) return;
+    if(extraUI) extraUI.tick(run);
+    if(run.deadline && Date.now()>=run.deadline && !busy) {
+      if(run.practice) finishRun("challenge",0);
+      else if(run.streak) cashOut();
+      else finishRun("timeout",0);
+    }
+  }
+
+  function multiplierFor(streak) {
+    if (streak <= 0) return 0;
+    return C.streakMultipliers[Math.min(streak, C.streakMultipliers.length) - 1];
+  }
+
+  function updateRunUI() {
+    if (!run) return;
+    const multiplier = multiplierFor(run.streak);
+    run.cashout = run.streak ? Math.floor(run.wager * multiplier) : 0;
+    el.hudStreak.textContent = run.streak;
+    el.hudMultiplier.textContent = run.streak ? multiplier.toFixed(2).replace(/\.00$/, "") + "× MULTIPLIER" : "START";
+    el.hudCashout.textContent = run.practice ? "Practice" : format(run.cashout);
+    el.cashoutValue.textContent = run.practice ? "FINISH" : run.cashout ? format(run.cashout) + " CHIPS" : "—";
+    el.cashout.disabled = busy || run.ended || (!run.practice && run.streak < 1);
+    el.cashout.querySelector("span").textContent=run.practice ? "END CHALLENGE" : "CASH OUT";
+    el.lower.disabled = busy || run.ended || run.card.rank === 2;
+    el.higher.disabled = busy || run.ended || run.card.rank === 14;
+    const cost = Math.max(C.insurance.minimumCost, Math.ceil(run.cashout * C.insurance.costPercent));
+    const canInsure = !busy && !run.ended && run.streak >= C.insurance.minimumStreak && !run.insurance && save.chips >= cost;
+    el.insurance.disabled = busy || run.ended || run.practice || !canInsure;
+    el.insurance.classList.toggle("active", run.insurance);
+    el.insuranceCost.textContent = run.insurance ? "Active for next prediction" : run.streak < 1 ? "Available after first win" : format(cost) + " chips";
+    if (run.card.rank === 14) el.edgeHint.textContent = "Ace is highest — only Lower is available.";
+    else if (run.card.rank === 2) el.edgeHint.textContent = "2 is lowest — only Higher is available.";
+    else el.edgeHint.textContent = "";
+    updateOdds();
+    updateCombo();
+    if(extraUI) extraUI.atmosphere(run);
+  }
+
+  function updateOdds() {
+    if (!run) return;
+    const higher = Math.round((14 - run.card.rank) / 13 * 100);
+    const lower = Math.round((run.card.rank - 2) / 13 * 100);
+    const tie = Math.round(1 / 13 * 100);
+    el.oddsHint.parentElement.querySelector("span").textContent = run.practice ? "FIXED REPLAY · BOOSTERS OFF" : "INDEPENDENT DRAWS · WITH REPLACEMENT";
+    el.oddsHint.textContent = run.practice ? "Same cards for this challenge · ties push" : "Higher " + higher + "% · Tie " + tie + "% · Lower " + lower + "%";
+  }
+
+  function updateCombo() {
+    if (!run) return;
+    const next = C.streakChests.find(chest => chest.streak > run.streak);
+    const previous = [...C.streakChests].reverse().find(chest => chest.streak <= run.streak);
+    const start = previous ? previous.streak : 0;
+    const percent = next ? (run.streak - start) / (next.streak - start) * 100 : 100;
+    el.comboBar.style.width = Math.max(0, Math.min(100, percent)) + "%";
+    el.comboText.textContent = run.streak ? run.streak + "× COMBO" : "BUILD YOUR COMBO";
+    el.nextChestText.textContent = next ? "Chest at streak " + next.streak : "All milestone chests reached";
+  }
+
+  function pulseCombo() {
+    el.comboBar.classList.remove("pulse");
+    void el.comboBar.offsetWidth;
+    el.comboBar.classList.add("pulse");
+  }
+
+  function setBusy(value) { busy = value; updateRunUI(); }
+
+  function setPrompt(message, type) {
+    el.prompt.textContent = message;
+    el.prompt.className = "game-prompt" + (type ? " " + type : "");
+  }
+
+  function predict(direction) {
+    if (!run || busy || run.ended || anyModal()) return;
+    if (!["higher","lower"].includes(direction) || (direction === "higher" && run.card.rank === 14) || (direction === "lower" && run.card.rank === 2)) return;
+    if(run.deadline && Date.now()>=run.deadline){tickRun();return;}
+    clearDecisionTimer();
+    setBusy(true);
+    const activeRun=run;
+    const oldRank=run.card.rank;
+    const shield=run.insurance; run.insurance=false;
+    const next = drawRunCard();
+    run.pending={next,direction};
+    track("prediction_selected",{direction,current:run.card,next,streak:run.streak,shield,mode:run.mode});
+    persist();
+    renderCard(el.nextCard, next, "reveal");
+    tone(direction === "higher" ? 520 : 310, .05);
+
+    window.setTimeout(() => {
+      if(run!==activeRun || run.ended) return;
+      run.pending=null;
+      const tie = next.rank === run.card.rank;
+      const correct = tie || (direction === "higher" ? next.rank > run.card.rank : next.rank < run.card.rank);
+      track("prediction_resolved",{direction,from:run.card,to:next,result:tie?"tie":correct?"correct":"incorrect",shield,streakBefore:run.streak,streakAfter:tie||shield&&!correct?run.streak:correct?run.streak+1:run.practice?0:run.streak,mode:run.mode,elapsedMs:Date.now()-run.startedAt});
+      run.card = next;
+      save.stats.totalPredictions += 1;
+      let chest = null;
+
+      if (tie) {
+        save.stats.ties += 1;
+        setPrompt("Tie — your streak is safe. Predict again.", "tie");
+        el.nextCard.classList.add("win");
+        tone(620, .12);
+        if(extraUI)extraUI.react("tie",run);
+      } else if (correct) {
+        save.stats.correct += 1;
+        run.streak += 1;
+        run.correct++; run.maxStreak=Math.max(run.maxStreak,run.streak);
+        updateDailyMission("correct",1);
+        if(direction==="lower")updateDailyMission("lower",1);
+        const chance = direction==="higher" ? (14-oldRank)/13 : (oldRank-2)/13;
+        const perfect=chance>0 && chance<6/13;
+        if(perfect){hybrid.h.perfect++;grantXp(5,true);updateDailyMission("perfect",1);}
+        if(extraUI)extraUI.react(perfect?"perfect":run.recovering?"comeback":(run.streak>run.personalBest?"record":"correct"),run);
+        run.recovering=false;
+        save.bestStreak = Math.max(save.bestStreak, run.streak);
+        grantXp(C.xp.correctPrediction, true);
+        updateDailyMission("maxStreak", run.streak);
+        setPrompt("Correct! Keep going or secure your chips.", "good");
+        el.nextCard.classList.add("win");
+        pulseCombo();
+        flashScreen("win");
+        chord([540, 680, 820]);
+        if (run.streak >= 3) burstParticles(run.streak >= 8 ? "#ffca62" : "#33e6e2", Math.min(26, 8 + run.streak));
+        chest = claimMilestoneChest();
+      } else if (shield) {
+        run.recovering=true;
+        save.stats.incorrect += 1;
+        run.insurance = false;
+        setPrompt("Protected! Insurance saved this prediction.", "tie");
+        el.nextCard.classList.add("win");
+        chord([360, 510]);
+        showToast("Insurance consumed — your run continues");
+        if(extraUI)extraUI.react("shield",run);
+      } else {
+        save.stats.incorrect += 1;
+        el.nextCard.classList.add("lose");
+        setPrompt("Wrong prediction — the run is over.", "bad");
+        flashScreen("loss");
+        tone(130, .3, "sawtooth");
+        checkAchievements();
+        if(extraUI)extraUI.react("loss",run);
+        if(!run.practice){ run.trace.push([Date.now()-run.startedAt,direction,run.streak]); finishRun("loss", 0); return; }
+        run.streak=0;run.recovering=true;
+        setPrompt("Wrong call — fresh streak. Keep going until the timer ends.", "bad");
+      }
+
+      run.trace.push([Date.now()-run.startedAt,direction,run.streak]);
+      checkAchievements();
+      persist();
+      updateRunUI();
+      window.setTimeout(() => {
+        if (run!==activeRun || run.ended) return;
+        renderCard(el.currentCard, run.card);
+        renderBack();
+        setBusy(false);
+        if (run.boosts.includes("auto") && run.streak>=3 && !run.practice) { cashOut(); return; }
+        if(chest && !run.deadline) openChest(chest);
+        else { if(chest)showToast("Milestone chest: +"+chest.xp+" XP"); startDecisionTimer(); }
+        tickRun();
+      }, 580);
+    }, C.revealDelayMs);
+  }
+
+  function claimMilestoneChest() {
+    const chest = C.streakChests.find(item => item.streak === run.streak);
+    if (!chest || run.claimedChests.includes(chest.streak)) return null;
+    run.claimedChests.push(chest.streak);
+    track("chest_claimed",{streak:run.streak,xp:chest.xp,chips:0});
+    if(extraUI)extraUI.react("chest",run);
+    grantXp(chest.xp, true);
+    return chest;
+  }
+
+  function openChest(chest) {
+    clearDecisionTimer();
+    el.chestStreak.textContent = chest.streak;
+    el.chestXp.textContent = format(chest.xp);
+    el.chestModal.classList.add("open");
+    el.chestModal.setAttribute("aria-hidden", "false");
+    burstParticles("#ffca62", 34);
+    chord([440, 550, 680, 880]);
+  }
+
+  function collectChest() {
+    if(!el.chestModal.classList.contains("open"))return;
+    el.chestModal.classList.remove("open");
+    el.chestModal.setAttribute("aria-hidden", "true");
+    persist();
+    startDecisionTimer();
+  }
+
+  function activateInsurance() {
+    if (!run || run.insurance || run.streak < C.insurance.minimumStreak || busy || run.ended || run.practice || anyModal()) return;
+    const cost = Math.max(C.insurance.minimumCost, Math.ceil(run.cashout * C.insurance.costPercent));
+    if (save.chips < cost) { showToast("Not enough chips for insurance"); return; }
+    changeChips(-cost,"insurance_purchase");
+    track("insurance_activated",{cost,streak:run.streak});
+    run.insurance = true;
+    persist();
+    updateRunUI();
+    chord([420, 580]);
+    showToast("Next prediction protected for " + format(cost) + " chips");
+  }
+
+  function cashOut() {
+    if (!run || (!run.practice && run.streak < 1) || busy || run.ended || anyModal()) return;
+    clearDecisionTimer();
+    setBusy(true);
+    if(run.practice){finishRun("challenge",0);return;}
+    changeChips(run.cashout,"cashout");
+    if(extraUI)extraUI.react("cashout",run);
+    chord([520, 670, 840, 1020]);
+    burstParticles("#ffca62", 30);
+    finishRun("cashout", run.cashout);
+  }
+
+  function finishRun(type, reward) {
+    if (!run || run.ended) return;
+    run.ended = true;
+    clearInterval(activeClock);
+    clearDecisionTimer();
+    save.runsPlayed += 1;
+    save.stats.totalRuns += 1;
+    save.stats.totalStreak += run.maxStreak;
+    if (type === "cashout") {
+      save.stats.cashouts += 1;
+      save.stats.totalRewards += reward;
+      save.stats.highestReward = Math.max(save.stats.highestReward, reward);
+    }
+    updateDailyMission("runs", 1);
+    if (type === "cashout") updateDailyMission("cashout", reward);
+    grantXp(C.xp.runBase + (type === "cashout" ? C.xp.cashOutBonus : 0), true);
+    if(!run.practice)recordLeaderboardScore(reward);
+    lastResult={id:run.id,name:save.playerName,mode:run.mode,type,reward,streak:run.maxStreak,correct:run.correct,seed:run.seed,cards:run.cards,trace:run.trace,skin:save.cardSkin,xp:run.xpEarned,level:levelFromXp(save.totalXp),rank:rankForLevel(levelFromXp(save.totalXp)).name,identity:hybrid.identity(),personalBest:run.maxStreak>run.personalBest,ghost:run.ghost};
+    track("run_completed",{...lastResult,durationMs:Date.now()-run.startedAt});
+    hybrid.complete(lastResult);
+    if(extraUI)extraUI.flush();
+    checkAchievements();
+    persist();
+    const completedRun=run;
+    resultDelay=window.setTimeout(() => {if(run===completedRun)showResult(type, reward);}, type === "loss" ? 650 : 250);
+  }
+
+  function showResult(type, reward) {
+    el.resultKicker.textContent = type === "cashout" ? "RUN COMPLETE" : "RUN ENDED";
+    el.resultTitle.textContent = type === "cashout" ? "Smart cash-out!" : "The house wins this run";
+    el.resultMessage.textContent = type === "cashout" ? "Your virtual chips are secured." : "One wrong call ended the streak. Ready to try again?";
+    el.resultStreak.textContent = run ? run.streak : 0;
+    el.resultReward.textContent = format(reward);
+    el.resultXp.textContent = "+" + format(run ? run.xpEarned : 0);
+    if(type==="challenge"){el.resultTitle.textContent="Challenge complete!";el.resultMessage.textContent=run.correct+" correct calls · best streak "+run.maxStreak;}
+    if(type==="timeout"){el.resultTitle.textContent="Time’s up";el.resultMessage.textContent="Your earned XP is saved.";}
+    el.resultStreak.textContent=run.maxStreak;
+    if(extraUI)extraUI.result(lastResult);
+    el.resultModal.classList.add("open");
+    el.resultModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeResult() {
+    el.resultModal.classList.remove("open");
+    el.resultModal.setAttribute("aria-hidden", "true");
+  }
+
+  function sortedLeaderboard() {
+    const scores = Array.isArray(save.leaderboard) ? save.leaderboard : [];
+    return [...scores].sort((a, b) =>
+      (Number(b.streak) || 0) - (Number(a.streak) || 0) ||
+      (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
+      (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0)
+    );
+  }
+
+  function recordLeaderboardScore(reward) {
+    if (!run || run.streak < 1) return;
+    const entry = {
+      id: run.id,
+      name: cleanPlayerName(save.playerName),
+      streak: run.streak,
+      reward: Math.floor(reward),
+      mode: run.mode,
+      createdAt: Date.now(),
+      demo: false
+    };
+    if (!Array.isArray(save.leaderboard)) save.leaderboard = [];
+    save.leaderboard.push(entry);
+    save.leaderboard = sortedLeaderboard().slice(0, C.leaderboardLimit);
+    const place = save.leaderboard.findIndex(score => score.id === entry.id) + 1;
+    const rewardTier = C.leaderboardRewards.find(tier => tier.place === place);
+    if (rewardTier && !save.leaderboardRewardsClaimed[place]) {
+      save.leaderboardRewardsClaimed[place] = true;
+      changeChips(rewardTier.chips,"all_time_leaderboard",{place});
+      grantXp(rewardTier.xp, true);
+      showToast("Top " + place + " reward: +" + format(rewardTier.chips) + " chips and +" + rewardTier.xp + " XP");
+      burstParticles("#ffca62", 24);
+    }
+  }
+
+  function renderLeaderboard() {
+    const scores = sortedLeaderboard().slice(0, C.leaderboardLimit);
+    el.leaderboardRows.innerHTML = "";
+    scores.forEach((score, index) => {
+      const row = document.createElement("tr");
+      if (!score.demo && score.name === save.playerName) row.className = "current-player";
+      const place = index < 3 ? ["♛", "◆", "●"][index] : String(index + 1);
+      row.innerHTML = "<td>" + place + '</td><td class="player-cell">' + cleanPlayerName(score.name) + (score.demo ? " (demo)" : "") +
+        "</td><td>" + format(score.streak) + '</td><td class="reward-cell">● ' + format(score.reward) +
+        '</td><td><span class="mode-pill">' + ({quick:"Quick",classic:"Classic",rush:"Rush",daily:"Daily",friend:"Friend",personal:"Personal",weekend:"Weekend"}[score.mode]||"Classic") + "</span></td>";
+      el.leaderboardRows.appendChild(row);
+    });
+    el.leaderboardRewards.innerHTML = "";
+    C.leaderboardRewards.forEach(tier => {
+      const claimed = Boolean(save.leaderboardRewardsClaimed[tier.place]);
+      const item = document.createElement("div");
+      item.className = "leaderboard-reward" + (claimed ? " claimed" : "");
+      item.innerHTML = "TOP " + tier.place + " · <b>● " + format(tier.chips) + " / ★ " + tier.xp + "</b>" + (claimed ? " · CLAIMED" : "");
+      el.leaderboardRewards.appendChild(item);
+    });
+  }
+
+  function openLeaderboard() {
+    el.playerName.value = cleanPlayerName(save.playerName);
+    renderLeaderboard();
+    el.leaderboardModal.classList.add("open");
+    el.leaderboardModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeLeaderboard() {
+    el.leaderboardModal.classList.remove("open");
+    el.leaderboardModal.setAttribute("aria-hidden", "true");
+  }
+
+  function savePlayerName() {
+    save.playerName = cleanPlayerName(el.playerName.value);
+    el.playerName.value = save.playerName;
+    persist();
+    renderLeaderboard();
+    showToast("Leaderboard name saved");
+  }
+
+  function renderProfile() {
+    const progress = levelProgress();
+    const rank = rankForLevel(progress.level);
+    const nextRank = nextRankForLevel(progress.level);
+    const decided = save.stats.correct + save.stats.incorrect;
+    el.modalRankIcon.textContent = rank.icon;
+    el.modalRankName.textContent = rank.name.toUpperCase();
+    el.modalLevel.textContent = progress.level;
+    el.modalNextRank.textContent = nextRank ? "Next rank: " + nextRank.name + " at level " + nextRank.minLevel : "Maximum rank achieved";
+    el.statWinRate.textContent = decided ? Math.round(save.stats.correct / decided * 100) + "%" : "0%";
+    el.statAverageStreak.textContent = save.stats.totalRuns ? (save.stats.totalStreak / save.stats.totalRuns).toFixed(1) : "0.0";
+    el.statHighestReward.textContent = format(save.stats.highestReward);
+    el.statPredictions.textContent = format(save.stats.totalPredictions);
+    el.achievementGrid.innerHTML = "";
+    let unlockedCount = 0;
+    C.achievements.forEach(achievement => {
+      const unlocked = Boolean(save.achievements[achievement.id]);
+      if (unlocked) unlockedCount += 1;
+      const badge = document.createElement("div");
+      badge.className = "achievement" + (unlocked ? " unlocked" : "");
+      badge.innerHTML = '<span class="achievement-icon">' + (unlocked ? achievement.icon : "?") + "</span><b>" + achievement.title + "</b><small>" + achievement.description + "</small>";
+      el.achievementGrid.appendChild(badge);
+    });
+    el.badgeCount.textContent = unlockedCount + " / " + C.achievements.length + " UNLOCKED";
+  }
+
+  function openProfile() {
+    renderProfile();
+    el.profileModal.classList.add("open");
+    el.profileModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeProfile() {
+    el.profileModal.classList.remove("open");
+    el.profileModal.setAttribute("aria-hidden", "true");
+  }
+
+  function addTestXp() {
+    grantXp(C.testXpGrant, false);
+    checkAchievements();
+    persist();
+    renderProfile();
+    showToast("Test progress: +" + C.testXpGrant + " XP");
+  }
+
+  function abandonActiveRun() {
+    if (!run || run.ended) return;
+    run.ended = true;
+    save.runsPlayed += 1;
+    save.stats.totalRuns += 1;
+    save.stats.totalStreak += run.maxStreak;
+    track("run_abandoned",{mode:run.mode,wager:run.wager,streak:run.maxStreak,correct:run.correct,durationMs:Date.now()-run.startedAt,cards:run.cards,trace:run.trace});
+    // Abandoning does not count as completing a mission or grant completion XP.
+    checkAchievements();
+    persist();
+  }
+
+  function returnHome() {
+    if(busy && run && !run.ended){showToast("Wait for the card reveal to finish.");return;}
+    clearTimeout(resultDelay);
+    clearInterval(activeClock);
+    clearDecisionTimer();
+    abandonActiveRun();
+    run = null;
+    busy = false;
+    closeResult();
+    closeLeaderboard();
+    closeProfile();
+    el.chestModal.classList.remove("open");
+    switchScreen("menu");
+    renderPersistentUI();
+  }
+
+  function anyModal() { return [el.resultModal,el.chestModal,el.profileModal,el.leaderboardModal].some(m=>m.classList.contains("open")) || !!extraUI?.isOpen(); }
+
+  function startDecisionTimer() {
+    clearDecisionTimer();
+    if (selectedMode !== "quick" || !run || run.ended) {
+      el.timerWrap.classList.add("hidden");
+      return;
+    }
+    el.timerWrap.classList.remove("hidden");
+    el.timerBar.style.transition = "none";
+    el.timerBar.style.transform = "scaleX(1)";
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.timerBar.style.transition = "transform " + C.quickModeSeconds + "s linear";
+      el.timerBar.style.transform = "scaleX(0)";
+    }));
+    run.decisionDeadline=Date.now()+C.quickModeSeconds*1000;
+    timerId = window.setTimeout(() => {
+      if (run && !run.ended && !busy) {
+        setPrompt("Time ran out — the run is over.", "bad");
+        flashScreen("loss");
+        tone(130, .3, "sawtooth");
+        finishRun("loss", 0);
+      }
+    }, C.quickModeSeconds * 1000);
+  }
+
+  function clearDecisionTimer() {
+    if (timerId) window.clearTimeout(timerId);
+    timerId = null;
+  }
+
+  function claimDaily() {
+    const wait = C.dailyRewardCooldownHours * 60 * 60 * 1000;
+    if (Date.now() - save.lastDailyReward < wait) return;
+    save.lastDailyReward = Date.now();
+    changeChips(C.dailyReward,"daily_drop");
+    persist();
+    chord([440, 660, 880]);
+    burstParticles("#a86cff", 18);
+    showToast("Daily drop claimed: +" + format(C.dailyReward) + " chips");
+  }
+
+  function addTestCoins() {
+    changeChips(C.testCoinGrant,"test_coins");
+    persist();
+    chord([440, 620, 820]);
+    showToast("Test balance: +" + format(C.testCoinGrant) + " chips");
+  }
+
+  function showToast(message) {
+    toastQueue.push(message);
+    if (showingToast) return;
+    displayNextToast();
+  }
+
+  function displayNextToast() {
+    if (!toastQueue.length) { showingToast = false; return; }
+    showingToast = true;
+    el.toast.textContent = toastQueue.shift();
+    el.toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+      el.toast.classList.remove("show");
+      window.setTimeout(displayNextToast, 260);
+    }, 2100);
+  }
+
+  function flashScreen(type) {
+    const className = type + "-flash";
+    document.body.classList.remove("win-flash", "loss-flash");
+    void document.body.offsetWidth;
+    document.body.classList.add(className);
+    window.setTimeout(() => document.body.classList.remove(className), 600);
+  }
+
+  function burstParticles(color, count) {
+    const total = Math.min(40, count || 16);
+    for (let index = 0; index < total; index += 1) {
+      const particle = document.createElement("i");
+      particle.className = "fx-particle";
+      particle.style.left = (42 + Math.random() * 16) + "%";
+      particle.style.top = (26 + Math.random() * 18) + "%";
+      particle.style.background = index % 3 === 0 ? "#ffca62" : color;
+      particle.style.setProperty("--drift", (-180 + Math.random() * 360) + "px");
+      particle.style.setProperty("--spin", (-360 + Math.random() * 720) + "deg");
+      particle.style.animationDelay = (Math.random() * .18) + "s";
+      el.fxLayer.appendChild(particle);
+      window.setTimeout(() => particle.remove(), 1500);
+    }
+  }
+
+  function tone(frequency, duration, type) {
+    if (!save.sound) return;
+    try {
+      audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = type || "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(.055, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + duration);
+      oscillator.connect(gain).connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (_) { /* Audio is optional. */ }
+  }
+
+  function chord(notes) { notes.forEach((note, index) => window.setTimeout(() => tone(note, .12), index * 65)); }
+
+  el.deal.addEventListener("click", () => { if(!["classic","quick"].includes(selectedMode))selectedMode="classic";startRun(); });
+  el.lower.addEventListener("click", () => predict("lower"));
+  el.higher.addEventListener("click", () => predict("higher"));
+  el.insurance.addEventListener("click", activateInsurance);
+  el.cashout.addEventListener("click", cashOut);
+  el.daily.addEventListener("click", claimDaily);
+  el.addCoins.addEventListener("click", addTestCoins);
+  el.profileButton.addEventListener("click", openProfile);
+  el.closeProfile.addEventListener("click", closeProfile);
+  el.addXp.addEventListener("click", addTestXp);
+  el.leaderboardButton.addEventListener("click", openLeaderboard);
+  el.resultLeaderboard.addEventListener("click", openLeaderboard);
+  el.closeLeaderboard.addEventListener("click", closeLeaderboard);
+  el.saveName.addEventListener("click", savePlayerName);
+  el.playerName.addEventListener("keydown", event => { if (event.key === "Enter") savePlayerName(); });
+  el.collectChest.addEventListener("click", collectChest);
+  el.home.addEventListener("click", returnHome);
+  el.resultHome.addEventListener("click", returnHome);
+  el.playAgain.addEventListener("click", () => {
+    const mode=run?.mode||hybrid.h.lastMode;
+    const options=run?.practice?{seed:run.seed,ghost:run.ghost,cards:run.replayCards}:{};
+    closeResult(); run=null;busy=false;startMode(mode,options);
+  });
+  el.sound.addEventListener("click", () => {
+    save.sound = !save.sound;
+    persist();
+    if (save.sound) tone(600, .08);
+  });
+  document.querySelectorAll(".mode-btn").forEach(button => button.addEventListener("click", () => {
+    selectedMode = button.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(item => item.classList.toggle("active", item === button));
+    tone(470, .05);
+  }));
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && el.profileModal.classList.contains("open")) { closeProfile(); return; }
+    if (event.key === "Escape" && el.leaderboardModal.classList.contains("open")) { closeLeaderboard(); return; }
+    if (!el.game.classList.contains("active") || busy || !run || run.ended || anyModal() || ["INPUT","SELECT","TEXTAREA"].includes(event.target?.tagName)) return;
+    if(["ArrowUp","ArrowDown","c","C"].includes(event.key))event.preventDefault();
+    if (event.key === "ArrowUp") predict("higher");
+    if (event.key === "ArrowDown") predict("lower");
+    if (event.key.toLowerCase() === "c" && run.streak) cashOut();
+  });
+  window.setInterval(updateDailyReward, 60000);
+  if (false) navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  function startMode(mode,options={}) {
+    if(run && !run.ended)return;
+    if(!["classic","quick","rush","daily","friend","personal","weekend"].includes(mode))mode="rush";
+    selectedMode=mode;pendingOptions=options;
+    if(options.autoWager!==false)selectedWager=C.wagerTiers.filter(v=>v<=Math.min(save.chips,100)).pop()||C.wagerTiers[0];
+    startRun();
+  }
+  extraUI=HighLowHybridUI({C,save,hybrid,el,persist,showToast,burstParticles,tone,grantXp,checkAchievements,
+    startMode,returnHome,predict,cashOut,activateInsurance,levelProgress,rankForLevel,
+    getRun:()=>run,isBusy:()=>busy,isModal:anyModal,randomInt:secureRandomInt,
+    moreTime:()=>{if(!run||run.ended||busy||run.timeUsed||!run.boosts.includes("time")||run.practice)return false;
+      if(!run.deadline && run.mode!=="quick")return false;run.timeUsed=true;track("booster_used",{booster:"time",seconds:3});if(run.deadline)run.deadline+=3000;else if(run.mode==="quick"){clearDecisionTimer();timerId=setTimeout(()=>finishRun("timeout",0),Math.max(0,(run.decisionDeadline||Date.now())-Date.now())+3000);}return true;}
+  });
+  telemetry.attach(()=>({save,run}));
+  track("game_loaded",{configuration:C,saveSchema:1,playerName:save.playerName});
+  hybrid.welcome();extraUI.flush();
+  checkAchievements();
+  persist();
+})();
+</script>
+</body>
+</html>

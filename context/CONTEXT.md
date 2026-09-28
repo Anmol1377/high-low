@@ -334,7 +334,7 @@ gameplay input.
 | No backend | Scores, leagues, challenges and the wallet are client-authoritative. Nothing competitive can carry value until Phase 3. |
 | Device clock | All time-based rewards can be gamed by changing the clock. |
 | No run resume | Closing mid-run abandons it; the wager stays spent. |
-| Telemetry upload | Needs the Apps Script web-app URL in `CONFIG.TELEMETRY.endpoint`. |
+| Telemetry upload | Ordinary hosting queues and exports only. `google/` bundles the game for Apps Script, where it uploads to Sheets through `google.script.run` — see `google/README.md`. |
 | Sound / haptics | Settings toggles exist; no audio or haptic output is implemented. |
 
 ---
