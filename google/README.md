@@ -36,6 +36,23 @@ to Apps Script at all (GDD §23.5), so there it queues and exports instead.
 Nothing else is needed: no API key, no service account, no spreadsheet ID to
 copy. `setup_` creates the sheet and remembers its ID in script properties.
 
+## If the web app will not open
+
+Run **`debug_`** from the editor (function dropdown → Run) and read the
+Execution log. It prints the signed-in account, whether the game bundle pasted
+completely, the spreadsheet URL, which tabs exist, and the deployed URL.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| "Sorry, unable to open the file at present" | Several Google accounts signed in; the plain `/exec` URL cannot tell which one owns the script | Use the account-pinned URL `debug_` prints (`/macros/u/0/s/…`), trying `u/1`, `u/2` … — or open `/exec` in an Incognito window signed into only that account |
+| "Paste incomplete" page | The last line `const GAME_B64_ = '…';` is missing | Re-paste all of `INSTALL.gs`, then Deploy → Manage deployments → ✏️ → New version |
+| "Web app error" page with a stack trace | A real script error | Send the trace; it names the failing line |
+| `debug_` prints "Deployed URL: none" | Never deployed, or the deployment was deleted | Deploy → New deployment → Web app |
+
+`doGet` now catches its own errors, so a failure shows a readable message
+instead of Google's generic page. **Any change needs a new deployment version** —
+saving the editor alone does not update a live `/exec` URL.
+
 ## Updating the game later
 
 ```sh

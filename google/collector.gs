@@ -49,14 +49,61 @@ function setup_() {
 }
 
 function doGet(e) {
-  const code = String((e && e.parameter && e.parameter.c) || '').slice(0, 100000);
-  let html = Utilities.newBlob(Utilities.base64Decode(GAME_B64_)).getDataAsString();
-  // A challenge link arrives as ?c=… ; hand it to the page, which reads this.
-  if (code) html = html.replace('</head>', '<script>window.__HLC_CHALLENGE__=' +
-                                JSON.stringify(code) + ';</script></head>');
-  return HtmlService.createHtmlOutput(html)
-    .setTitle('High Low Casino')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover');
+  // Any throw in here surfaces as Google's unhelpful generic page, so failures
+  // are caught and rendered as readable text instead.
+  try {
+    if (typeof GAME_B64_ === 'undefined' || !GAME_B64_) {
+      return HtmlService.createHtmlOutput(
+        '<h2>Paste incomplete</h2><p>GAME_B64_ is missing. The last line of the ' +
+        'script must be <code>const GAME_B64_ = \'…\';</code> — re-paste all of ' +
+        'google/INSTALL.gs, then Deploy &rarr; Manage deployments &rarr; New version.</p>');
+    }
+    const code = String((e && e.parameter && e.parameter.c) || '').slice(0, 100000);
+    let html = Utilities.newBlob(Utilities.base64Decode(GAME_B64_)).getDataAsString();
+    // A challenge link arrives as ?c=… ; hand it to the page, which reads this.
+    if (code) html = html.replace('</head>', '<script>window.__HLC_CHALLENGE__=' +
+                                  JSON.stringify(code) + ';</script></head>');
+    return HtmlService.createHtmlOutput(html)
+      .setTitle('High Low Casino')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  } catch (err) {
+    return HtmlService.createHtmlOutput('<h2>Web app error</h2><pre>' +
+      String(err && err.stack || err).replace(/</g, '&lt;') + '</pre>');
+  }
+}
+
+/**
+ * Run this from the editor when the web app will not open. It prints
+ * everything needed to tell an account problem from a code problem.
+ */
+function debug_() {
+  const out = [];
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('SPREADSHEET_ID') || SPREADSHEET_ID_;
+  out.push('Signed in as: ' + Session.getEffectiveUser().getEmail());
+  out.push('Game bundle: ' + (typeof GAME_B64_ === 'undefined' ? 'MISSING - paste was cut off'
+           : Math.round(GAME_B64_.length / 1024) + ' KB'));
+  out.push('Spreadsheet id: ' + (id || 'NOT SET - run setup_ first'));
+  if (id) {
+    try {
+      const book = SpreadsheetApp.openById(id);
+      out.push('Spreadsheet: ' + book.getUrl());
+      const missing = TABS_.filter(function (n) { return !book.getSheetByName(n); });
+      out.push('Tabs: ' + (missing.length ? 'MISSING ' + missing.join(', ') : 'all ' + TABS_.length + ' present'));
+    } catch (err) { out.push('Spreadsheet ERROR: ' + err); }
+  }
+  let url = null;
+  try { url = ScriptApp.getService().getUrl(); } catch (err) {}
+  out.push('Deployed URL: ' + (url || 'none - deploy as a web app first'));
+  if (url) {
+    // The /u/N/ form pins the URL to one account; the plain form breaks when
+    // several Google accounts are signed in ("unable to open the file").
+    out.push('Account-pinned URL: ' + url.replace('/macros/', '/macros/u/0/'));
+  }
+  const report = out.join('\n');
+  console.log(report);
+  return report;
 }
 
 /** Reject anything malformed before it can reach a sheet. */
