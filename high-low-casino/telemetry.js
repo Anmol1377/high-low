@@ -117,7 +117,7 @@ async function log(evt, data) {
     await put({
       id: sessionId + ":" + n + ":" + i,            // idempotent across retries
       session: sessionId, seq: n, chunk: i, chunks: chunks.length,
-      player: playerId, tab: tabFor(evt), event: evt,
+      player: playerId, tab: tabFor(evt), event: evt, build: w.CONFIG.BUILD,
       at: new Date().toISOString(), body: chunks[i]
     });
   }

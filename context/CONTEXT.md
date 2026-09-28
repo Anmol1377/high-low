@@ -3,7 +3,7 @@
 Everything needed to pick this project up cold: what the game is, how it works,
 where the data lives, what was changed from the original design, and why.
 
-Last updated: 29 September 2026 · Build `2.4.2` · GDD `v2.3`
+Last updated: 29 September 2026 · Build `2.4.3` · GDD `v2.3`
 
 ---
 
@@ -190,7 +190,7 @@ to the Apps Script collector and appended to a Google Sheet (§7.3).
 | Player save | `localStorage` | `high-low-casino-save-v1` |
 | Anonymous player ID | `localStorage` | `hlc-player-id` |
 | Analytics queue | IndexedDB → `localStorage` (500 cap) → memory | DB `hlc-telemetry`, store `outbox` / key `hlc-outbox-v1` |
-| Offline app files | Service worker cache | `hlc-v2.4.2` |
+| Offline app files | Service worker cache | `hlc-v2.4.3` |
 
 ### 7.1 The save
 

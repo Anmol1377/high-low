@@ -8,15 +8,27 @@ global.window = {
   localStorage: {getItem: k => (k in store ? store[k] : null),
                  setItem: (k, v) => store[k] = String(v),
                  removeItem: k => delete store[k]},
-  crypto: global.crypto, addEventListener(){}, setTimeout, clearTimeout
+  crypto: global.crypto, addEventListener(){}, setTimeout, clearTimeout,
+  navigator: {onLine: false}          // keeps telemetry's deferred flush() inert
 };
 global.self = global.window;
-for (const f of ["config.js","game.js","hybrid-model.js"]) new Function(fs.readFileSync(f,"utf8")).call(global.window);
-const {CONFIG: C, Game: G, Hybrid: H} = global.window;
+// telemetry.init() touches these the way a page would; node already has navigator.
+global.document = {addEventListener(){}, visibilityState: "visible"};
+for (const f of ["config.js","game.js","hybrid-model.js","telemetry.js"]) new Function(fs.readFileSync(f,"utf8")).call(global.window);
+const {CONFIG: C, Game: G, Hybrid: H, Telemetry: T} = global.window;
 C.REVEAL_MS = C.SETTLE_MS = 0;      // resolve reveals inline so runs can be stepped
 
 let pass = 0;
-const ok = (name, fn) => { fn(); pass++; console.log("  ✓ " + name); };
+/* A test body may be async; awaiting the result keeps a rejection from becoming
+   a silent pass. Synchronous bodies are unaffected. */
+const pending = [];
+const ok = (name, fn) => {
+  const r = fn();
+  if (r && typeof r.then === "function") {
+    pending.push(r.then(() => { pass++; console.log("  \u2713 " + name); },
+                        e => { console.error("  \u2717 " + name); throw e; }));
+  } else { pass++; console.log("  \u2713 " + name); }
+};
 
 console.log("\nRULES");
 ok("higher/lower/tie probabilities match GDD 5.2", () => {
@@ -323,6 +335,34 @@ ok("every event this build logs routes to a real tab", () => {
   assert.deepStrictEqual(bad, [], "these events would be rejected: " + bad.join(", "));
 });
 
+/* The checks above read source. This one drives the real queue: without init()
+   telemetry stays on the in-memory backend, and exportJson() hands the records
+   back, so the shape that actually reaches the collector can be asserted. */
+const queued = (async () => {
+  await T.init();                     // assigns the player id, as a page load would
+  await T.log("game_loaded", {build: C.BUILD});
+  await T.log("weekly_reset", {place: 1});
+  await T.log("prediction_resolved", {outcome: "correct"});
+  return JSON.parse(await T.exportJson()).records;
+})();
+
+ok("a queued record carries the fields the collector requires", async () => {
+  const rows = await queued;
+  const byEvent = Object.fromEntries(rows.map(r => [r.event, r]));
+  assert.strictEqual(byEvent.game_loaded.tab, "session");
+  assert.strictEqual(byEvent.weekly_reset.tab, "progression");
+  assert.strictEqual(byEvent.prediction_resolved.tab, "predictions");
+  for (const r of rows) {
+    // Mirrors validate_ in collector.gs, which rejects the whole batch on any miss.
+    for (const k of ["id","session","player","event","at","tab","body","build"]) {
+      assert.strictEqual(typeof r[k], "string", `${r.event}.${k} must be a string, got ${typeof r[k]}`);
+    }
+    assert.strictEqual(r.build, C.BUILD, "build column would be written empty");
+    assert.strictEqual(r.id, r.session + ":" + r.seq + ":" + r.chunk);
+    assert(collectorTabs.includes(r.tab), `tab ${r.tab} is rejected`);
+  }
+});
+
 ok("the collector's own validation agrees", () => {
   // Mirror of validate_: the check that actually threw "Unknown tab events".
   const rejects = t => collectorTabs.indexOf(t) < 0;
@@ -338,6 +378,8 @@ ok("the collector's own validation agrees", () => {
    prediction. A losing call ends the run, so retry until one survives -
    otherwise the test passes or fails on the RNG rather than on the clock. */
 (async function timerTest() {
+  await Promise.all(pending);   // let the async checks finish before the tally
+
   let ticks = 0;
   G.on("timer", () => ticks++);
   let live = false;

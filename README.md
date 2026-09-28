@@ -76,7 +76,7 @@ directly) is needed for the offline cache and challenge links.
 ## Test
 
 ```sh
-cd high-low-casino && node test.js   # 32 checks: rules, economy, meta systems, telemetry routing, 20,000 simulated runs
+cd high-low-casino && node test.js   # 33 checks: rules, economy, meta systems, telemetry routing, 20,000 simulated runs
 python3 ev_check.py                  # multiplier curve vs the real streak probabilities (run from repo root)
 ```
 

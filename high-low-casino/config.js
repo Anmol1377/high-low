@@ -10,7 +10,7 @@
    run it after any retune or the code and the maths drift apart.
    ============================================================================= */
 window.CONFIG = {
-  BUILD: "2.4.2",
+  BUILD: "2.4.3",
   SAVE_KEY: "high-low-casino-save-v1",
 
   /* ---- 8.1 wager tiers / 8.2 streak multipliers ---- */
