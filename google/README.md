@@ -6,7 +6,7 @@ actually sends.
 
 | File | What it is |
 |---|---|
-| `collector.gs` | The collector: `setup_`, `doGet`, validation, `ingest` |
+| `collector.gs` | The collector: `setup`, `doGet`, `debugInfo`, validation, `ingest` |
 | `build.js` | Bundles the game + collector into `INSTALL.gs` |
 | `INSTALL.gs` | **Generated.** The single file you paste into Apps Script |
 | `collector.test.js` | 8 checks with stubbed Google services — `node google/collector.test.js` |
@@ -15,13 +15,18 @@ The game is served **by** the script so the page can call `ingest` through
 `google.script.run`. That avoids CORS: a browser on ordinary hosting cannot post
 to Apps Script at all (GDD §23.5), so there it queues and exports instead.
 
+Only `setup`, `doGet`, `debugInfo` and `ingest` are public; everything else ends
+in `_`, which Apps Script both hides from the Run menu and blocks from
+`google.script.run`. `debugInfo` reports the owner email and spreadsheet URL, so
+delete it and `setup` before widening access beyond people you trust.
+
 ## Setup (once, ~5 minutes)
 
 1. Go to **https://script.google.com** → **New project** → name it
    `High Low Casino`.
 2. In the editor, open the default `Code.gs`, select all, and **paste the entire
    contents of `google/INSTALL.gs`**. Save (⌘S).
-3. In the function dropdown pick **`setup_`** → **Run**. Approve the permission
+3. In the function dropdown pick **`setup`** → **Run**. Approve the permission
    prompt (it asks for spreadsheet access only). This creates a spreadsheet
    named *High Low Casino — Game Data* with 12 tabs. The Execution log prints
    its URL — open it once to confirm.
@@ -34,20 +39,20 @@ to Apps Script at all (GDD §23.5), so there it queues and exports instead.
    `predictions` and `economy` within a few seconds.
 
 Nothing else is needed: no API key, no service account, no spreadsheet ID to
-copy. `setup_` creates the sheet and remembers its ID in script properties.
+copy. `setup` creates the sheet and remembers its ID in script properties.
 
 ## If the web app will not open
 
-Run **`debug_`** from the editor (function dropdown → Run) and read the
+Run **`debugInfo`** from the editor (function dropdown → Run) and read the
 Execution log. It prints the signed-in account, whether the game bundle pasted
 completely, the spreadsheet URL, which tabs exist, and the deployed URL.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| "Sorry, unable to open the file at present" | Several Google accounts signed in; the plain `/exec` URL cannot tell which one owns the script | Use the account-pinned URL `debug_` prints (`/macros/u/0/s/…`), trying `u/1`, `u/2` … — or open `/exec` in an Incognito window signed into only that account |
+| "Sorry, unable to open the file at present" | Several Google accounts signed in; the plain `/exec` URL cannot tell which one owns the script | Use the account-pinned URL `debugInfo` prints (`/macros/u/0/s/…`), trying `u/1`, `u/2` … — or open `/exec` in an Incognito window signed into only that account |
 | "Paste incomplete" page | The last line `const GAME_B64_ = '…';` is missing | Re-paste all of `INSTALL.gs`, then Deploy → Manage deployments → ✏️ → New version |
 | "Web app error" page with a stack trace | A real script error | Send the trace; it names the failing line |
-| `debug_` prints "Deployed URL: none" | Never deployed, or the deployment was deleted | Deploy → New deployment → Web app |
+| `debugInfo` prints "Deployed URL: none" | Never deployed, or the deployment was deleted | Deploy → New deployment → Web app |
 
 `doGet` now catches its own errors, so a failure shows a readable message
 instead of Google's generic page. **Any change needs a new deployment version** —

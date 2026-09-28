@@ -41,9 +41,9 @@ const ctx = {
   Array, JSON, Date, Number, String, Object, Error, isFinite, RegExp
 };
 const src = fs.readFileSync(path.join(__dirname, "collector.gs"), "utf8");
-new Function(...Object.keys(ctx), src + "\nthis.__api = {setup_, ingest, validate_, cell_};")
+new Function(...Object.keys(ctx), src + "\nthis.__api = {setup, ingest, validate_, cell_};")
   .call(ctx, ...Object.values(ctx));
-const {setup_, ingest, validate_, cell_} = ctx.__api;
+const {setup, ingest, validate_, cell_} = ctx.__api;
 
 const idsOf = sheet => sheet.rows.slice(1).map(r => String(r[0]).replace(/^'/, ""));
 
@@ -56,17 +56,17 @@ const rec = (seq, over) => Object.assign({
   body: '{"streak":5}', build: "2.3.3"
 }, over);
 
-setup_();
-ok("setup_ creates Events plus one tab per category", () => {
+setup();
+ok("setup creates Events plus one tab per category", () => {
   assert.strictEqual(Object.keys(book._sheets).length, 12);
   assert(book._sheets.Events && book._sheets.runs && book._sheets.snapshots);
   assert.strictEqual(book._sheets.Events.rows[0][0], "record_id");
 });
-ok("setup_ is safe to re-run and refuses a foreign table", () => {
-  setup_();
+ok("setup is safe to re-run and refuses a foreign table", () => {
+  setup();
   assert.strictEqual(book._sheets.Events.rows.length, 1, "header duplicated");
   book._sheets.runs.rows[0] = ["something", "else"];
-  assert.throws(() => setup_(), /Unexpected headers/);
+  assert.throws(() => setup(), /Unexpected headers/);
   book._sheets.runs.rows[0] = book._sheets.Events.rows[0].slice();
 });
 ok("a batch writes one category row and one receipt", () => {

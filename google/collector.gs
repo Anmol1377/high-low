@@ -7,8 +7,15 @@
  * cannot post to Apps Script, which is why GDD §23.5 limits auto-upload to the
  * /exec URL.
  *
- * Setup: paste INSTALL.gs into a new Apps Script project, run setup_ once,
+ * Setup: paste INSTALL.gs into a new Apps Script project, run setup once,
  * then Deploy → New deployment → Web app (Execute as: Me).
+ *
+ * setup and debugInfo carry no trailing underscore because Apps Script hides
+ * such functions from the editor's Run menu, and the owner must run both by
+ * hand. That also makes them reachable from the page, so debugInfo prints the
+ * owner email and spreadsheet URL - delete both before opening the web app to
+ * anyone beyond people you trust. Everything else stays private (_) so the
+ * page's only callable entry point is ingest.
  */
 
 // Leave empty to create a new spreadsheet on first setup_; it is then remembered.
@@ -23,7 +30,7 @@ const HEADERS_ = ['record_id', 'event_id', 'client_time_utc', 'received_time_utc
 const TABS_ = ['Events', 'session', 'runs', 'predictions', 'economy', 'progression',
                'missions', 'achievements', 'cosmetics', 'ui', 'errors', 'snapshots'];
 
-function setup_() {
+function setup() {
   const props = PropertiesService.getScriptProperties();
   const id = props.getProperty('SPREADSHEET_ID') || SPREADSHEET_ID_;
   const book = id ? SpreadsheetApp.openById(id)
@@ -77,7 +84,7 @@ function doGet(e) {
  * Run this from the editor when the web app will not open. It prints
  * everything needed to tell an account problem from a code problem.
  */
-function debug_() {
+function debugInfo() {
   const out = [];
   const props = PropertiesService.getScriptProperties();
   const id = props.getProperty('SPREADSHEET_ID') || SPREADSHEET_ID_;
@@ -174,7 +181,7 @@ function ingest(packet) {
     const book = SpreadsheetApp.openById(id);
     const sheet = function (name) {
       const s = book.getSheetByName(name);
-      if (!s) throw new Error('Missing ' + name + ' tab. Run setup_.');
+      if (!s) throw new Error('Missing ' + name + ' tab. Run setup from the editor.');
       return s;
     };
     const events = sheet('Events'), done = ids_(events), received = new Date().toISOString();
