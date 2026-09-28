@@ -76,14 +76,21 @@ async function drop(ids) {
 
 /* ---- category routing: which sheet tab an event belongs to (GDD 23.2) ---- */
 const TABS = {
-  session: /^session_|^network_/, runs: /^run_/, predictions: /^prediction_/,
-  economy: /^economy_|^insurance_|^chest_/, progression: /^xp_|^level_|^login_|^comeback_|^boosters_|^booster_/,
+  session: /^session_|^network_|^game_/, runs: /^run_/, predictions: /^prediction_/,
+  economy: /^economy_|^insurance_|^chest_/,
+  progression: /^xp_|^level_|^login_|^comeback_|^boosters_|^booster_|^weekly_|^season_/,
   missions: /^mission_/, achievements: /^achievement_/, cosmetics: /^pack_|^cosmetic_|^pass_/,
   ui: /^ui_|^gesture_/, errors: /^browser_error|^save_error/, snapshots: /^player_snapshot/
 };
+/* The fallback MUST be a tab the collector accepts. It used to be "events",
+   which is not a category tab, so the collector rejected the record - and
+   because a batch is the head of the outbox, one such record blocked every
+   event behind it forever. game_loaded did exactly that on every session.
+   test.js now asserts every event this build emits lands on a real tab. */
+const FALLBACK_TAB = "session";
 function tabFor(evt) {
   for (const tab in TABS) if (TABS[tab].test(evt)) return tab;
-  return "events";
+  return FALLBACK_TAB;
 }
 
 /* Formula-looking strings are stored as text so a collector cannot be tricked
@@ -184,6 +191,17 @@ async function clear() {
   else mem = [];
 }
 
+/* Records queued by an older build may carry a tab the collector rejects, which
+   would keep the outbox blocked even now the routing is fixed. Re-route them
+   once on load. drop-then-put rather than put alone, because put appends in the
+   localStorage and memory backends. */
+async function repairTabs() {
+  const bad = (await all()).filter(r => r && !(r.tab in TABS));
+  if (!bad.length) return;
+  await drop(bad.map(r => r.id));
+  for (const r of bad) await put(Object.assign({}, r, {tab: tabFor(r.event)}));
+}
+
 /* ------------------------------------------------------------------ boot --- */
 async function init() {
   getPlayerId();
@@ -192,6 +210,8 @@ async function init() {
     try { w.localStorage.setItem(LS, w.localStorage.getItem(LS) || "[]"); return "local"; }
     catch (e) { return "memory"; }
   })();
+
+  await repairTabs();
 
   log("game_loaded", {build: w.CONFIG.BUILD, storage: mode, host: appsScript() ? "apps-script" : "web"});
   log("session_start", {ua: navigator.userAgent.slice(0, 120), lang: navigator.language});

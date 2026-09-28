@@ -282,6 +282,57 @@ ok("weekly placement pays only against real rivals, and only once", () => {
   assert.strictEqual(s.chips, again, "same week settled twice");
 });
 
+console.log("\nTELEMETRY ROUTING");
+/* Every event has to land on a tab the collector will accept. It did not:
+   tabFor() fell back to "events", which is not a category tab, so the
+   collector rejected the record - and since a batch is the head of the
+   outbox, one such record blocked every event behind it forever. game_loaded
+   hit this on every single session, so nothing ever reached the sheet. */
+const telemetrySrc = fs.readFileSync("telemetry.js", "utf8");
+const collectorSrc = fs.readFileSync("../google/collector.gs", "utf8");
+
+const routing = (() => {
+  const tabs = telemetrySrc.match(/const TABS = \{[\s\S]*?\n\};/);
+  const fallback = telemetrySrc.match(/const FALLBACK_TAB = "([a-z]+)"/);
+  assert(tabs && fallback, "could not read the routing table out of telemetry.js");
+  const TABS = new Function(tabs[0] + " return TABS;")();
+  return {TABS, fallback: fallback[1],
+          tabFor: e => Object.keys(TABS).find(t => TABS[t].test(e)) || fallback[1]};
+})();
+
+// 'Events' (index 0) holds receipts, so validate_ rejects it as a category.
+const collectorTabs = new Function(
+  collectorSrc.match(/const TABS_ = \[[\s\S]*?\];/)[0] + " return TABS_;")().slice(1);
+
+ok("every tab the client can emit is one the collector accepts", () => {
+  for (const tab of Object.keys(routing.TABS).concat(routing.fallback)) {
+    assert(collectorTabs.includes(tab),
+      `tabFor can return "${tab}", which the collector rejects`);
+  }
+});
+
+ok("every event this build logs routes to a real tab", () => {
+  const names = new Set();
+  for (const f of ["config.js","game.js","hybrid-model.js","hybrid-ui.js","telemetry.js"]) {
+    const src = fs.readFileSync(f, "utf8");
+    for (const m of src.matchAll(/\b(?:log|emit)\(\s*"([a-z][a-z0-9_]*)"/g)) names.add(m[1]);
+  }
+  assert(names.has("game_loaded"), "scan missed game_loaded - the regex stopped matching");
+  assert(names.size > 20, `only found ${names.size} event names; the scan is not working`);
+  const bad = [...names].filter(n => !collectorTabs.includes(routing.tabFor(n)));
+  assert.deepStrictEqual(bad, [], "these events would be rejected: " + bad.join(", "));
+});
+
+ok("the collector's own validation agrees", () => {
+  // Mirror of validate_: the check that actually threw "Unknown tab events".
+  const rejects = t => collectorTabs.indexOf(t) < 0;
+  assert(rejects("events"), "test is not reproducing the original failure");
+  assert(!rejects(routing.tabFor("game_loaded")), "game_loaded still routes to a rejected tab");
+  assert(!rejects(routing.tabFor("weekly_reset")), "weekly_reset still routes to a rejected tab");
+  assert(!rejects(routing.tabFor("season_reset")), "season_reset still routes to a rejected tab");
+  assert(!rejects(routing.tabFor("totally_unknown_future_event")), "the fallback is not a real tab");
+});
+
 /* This last one needs real elapsed time. The bug was that predict() cleared the
    interval outright, so the proof is that ticks keep arriving AFTER a
    prediction. A losing call ends the run, so retry until one survives -
