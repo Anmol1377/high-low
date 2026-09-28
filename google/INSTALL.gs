@@ -91,7 +91,7 @@ function debugInfo() {
   out.push('Signed in as: ' + Session.getEffectiveUser().getEmail());
   out.push('Game bundle: ' + (typeof GAME_B64_ === 'undefined' ? 'MISSING - paste was cut off'
            : Math.round(GAME_B64_.length / 1024) + ' KB'));
-  out.push('Spreadsheet id: ' + (id || 'NOT SET - run setup_ first'));
+  out.push('Spreadsheet id: ' + (id || 'NOT SET - run setup from the editor'));
   if (id) {
     try {
       const book = SpreadsheetApp.openById(id);
@@ -100,13 +100,17 @@ function debugInfo() {
       out.push('Tabs: ' + (missing.length ? 'MISSING ' + missing.join(', ') : 'all ' + TABS_.length + ' present'));
     } catch (err) { out.push('Spreadsheet ERROR: ' + err); }
   }
+  // Run from the editor this returns the HEAD /dev URL, NOT the deployed /exec
+  // one, so it confirms the script is reachable but says nothing about whether
+  // a deployment exists. Take the /exec URL from Deploy - Manage deployments.
   let url = null;
   try { url = ScriptApp.getService().getUrl(); } catch (err) {}
-  out.push('Deployed URL: ' + (url || 'none - deploy as a web app first'));
+  out.push('Editor (/dev) URL: ' + (url || 'none'));
   if (url) {
-    // The /u/N/ form pins the URL to one account; the plain form breaks when
+    // The /u/N/ form pins a URL to one account; the plain form breaks when
     // several Google accounts are signed in ("unable to open the file").
-    out.push('Account-pinned URL: ' + url.replace('/macros/', '/macros/u/0/'));
+    out.push('Same URL pinned to this account: ' + url.replace('/macros/', '/macros/u/0/'));
+    out.push('Apply the same /u/0/ to your /exec URL when sharing or opening it.');
   }
   const report = out.join('\n');
   console.log(report);
