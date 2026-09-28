@@ -3,9 +3,8 @@
  * Adapted from google-sheets/Code.gs, trimmed to what this build actually sends.
  *
  * The game is served BY this script so the page can call ingest() through
- * google.script.run. That avoids CORS entirely — a browser on ordinary hosting
- * cannot post to Apps Script, which is why GDD §23.5 limits auto-upload to the
- * /exec URL.
+ * google.script.run, which avoids CORS entirely. A copy on ordinary hosting
+ * reaches the same spreadsheet through doPost instead — see the note there.
  *
  * Setup: paste INSTALL.gs into a new Apps Script project, run setup once,
  * then Deploy → New deployment → Web app (Execute as: Me).

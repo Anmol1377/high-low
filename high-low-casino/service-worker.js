@@ -1,6 +1,6 @@
 /* service-worker.js - versioned offline cache. GDD v2.3 sections 3.2, 24.1.
    Bump CACHE on every release so an old shell cannot survive an update. */
-const CACHE = "hlc-v2.4.0";
+const CACHE = "hlc-v2.4.1";
 
 /* Cache-first is right for a deployed PWA and wrong while developing: an edited
    stylesheet stays invisible until CACHE changes. Serve localhost straight from

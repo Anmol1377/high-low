@@ -10,7 +10,7 @@
    run it after any retune or the code and the maths drift apart.
    ============================================================================= */
 window.CONFIG = {
-  BUILD: "2.4.0",
+  BUILD: "2.4.1",
   SAVE_KEY: "high-low-casino-save-v1",
 
   /* ---- 8.1 wager tiers / 8.2 streak multipliers ---- */
@@ -188,7 +188,7 @@ window.CONFIG = {
     // Apps Script /exec URL. Set, the hosted game posts events here directly
     // (text/plain, so no CORS preflight). Requires the deployment's access to
     // be "Anyone". Empty = queue and export only.
-    endpoint: "https://script.google.com/macros/s/AKfycbw02UriJbkBZJNom5HRS8oBgSL8ln1iAl0nMZ7GcJSO5aD5slXRDyaFGEZMeoYOzyCL4g/exec",
+    endpoint: "https://script.google.com/macros/s/AKfycbyHugsDvgW6zKO0X7VZ32A1cUujSyz1SWxMOoiIzrDNE31fW1Oqy2ypVe0M_Epp97yfHA/exec",
     retryBaseMs: 2000,
     retryMaxMs: 300000
   }

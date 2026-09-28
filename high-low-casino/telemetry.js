@@ -6,9 +6,9 @@
    acknowledgement cannot duplicate a row. Only acknowledged ids leave the
    outbox. IndexedDB is primary, localStorage then memory are fallbacks.
 
-   No endpoint is configured by default: automatic upload only works from the
-   Apps Script web-app URL because it needs the authenticated bridge (GDD 23.5),
-   so on ordinary hosting this queues and exports instead of posting.
+   Two transports. Served by Apps Script, the page calls ingest() directly
+   through google.script.run. On ordinary hosting it POSTs to CONFIG.TELEMETRY
+   .endpoint instead; with no endpoint set it just queues and exports.
    ============================================================================= */
 (function (w) {
 "use strict";
@@ -119,9 +119,12 @@ async function log(evt, data) {
 
 /* ---------------------------------------------------------------- deliver -- */
 /* Served by Apps Script? Then the page can call the collector directly and no
-   endpoint or CORS is involved. A browser on ordinary hosting cannot post to
-   Apps Script at all, which is why GDD 23.5 limits auto-upload to the /exec
-   URL - there it queues and exports instead. */
+   endpoint or CORS is involved. Elsewhere it posts to the /exec URL as
+   text/plain: that counts as a "simple" request, so the browser skips the
+   preflight Apps Script cannot answer. Apps Script answers a POST with a 302 to
+   script.googleusercontent.com; fetch follows it and both hops send
+   Access-Control-Allow-Origin. Needs the deployment's access set to "Anyone".
+   With no endpoint configured this queues and exports instead. */
 const appsScript = () => (w.google && w.google.script && w.google.script.run) || null;
 function sendViaAppsScript(batch) {
   return new Promise((resolve, reject) => {

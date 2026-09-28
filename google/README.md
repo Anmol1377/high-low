@@ -6,16 +6,17 @@ actually sends.
 
 | File | What it is |
 |---|---|
-| `collector.gs` | The collector: `setup`, `doGet`, `debugInfo`, validation, `ingest` |
+| `collector.gs` | The collector: `setup`, `doGet`, `debugInfo`, `doPost`, validation, `ingest` |
 | `build.js` | Bundles the game + collector into `INSTALL.gs` |
 | `INSTALL.gs` | **Generated.** The single file you paste into Apps Script |
-| `collector.test.js` | 8 checks with stubbed Google services — `node google/collector.test.js` |
+| `collector.test.js` | 10 checks with stubbed Google services — `node google/collector.test.js` |
 
 The game is served **by** the script so the page can call `ingest` through
-`google.script.run`. That avoids CORS: a browser on ordinary hosting cannot post
-to Apps Script at all (GDD §23.5), so there it queues and exports instead.
+`google.script.run`, which avoids CORS entirely. A copy on ordinary hosting
+(GitHub Pages) reaches the same spreadsheet through `doPost` — see
+[Recording from the hosted game](#recording-from-the-github-pages-game) below.
 
-Only `setup`, `doGet`, `debugInfo` and `ingest` are public; everything else ends
+Only `setup`, `doGet`, `debugInfo`, `doPost` and `ingest` are public; everything else ends
 in `_`, which Apps Script both hides from the Run menu and blocks from
 `google.script.run`. `debugInfo` reports the owner email and spreadsheet URL, so
 delete it and `setup` before widening access beyond people you trust.
@@ -58,19 +59,26 @@ completely, the spreadsheet URL, which tabs exist, and the deployed URL.
 instead of Google's generic page. **Any change needs a new deployment version** —
 saving the editor alone does not update a live `/exec` URL.
 
-## Recording from the hosted (GitHub Pages) game
+## Recording from the GitHub Pages game
 
-By default only the Apps Script copy logs, because it can call `ingest` through
-`google.script.run`. To log from `anmol1377.github.io/high-low/` as well:
+`https://anmol1377.github.io/high-low/` logs to the same spreadsheet. Two things
+make that work, and both are already in place:
 
-1. `CONFIG.TELEMETRY.endpoint` in `high-low-casino/config.js` holds this
-   deployment's `/exec` URL (already set).
-2. The deployment's access must be **Anyone**:
-   Deploy → Manage deployments → ✏️ → Who has access: **Anyone** → Deploy.
+1. `CONFIG.TELEMETRY.endpoint` in `high-low-casino/config.js` holds the
+   deployment's `/exec` URL.
+2. The deployment's access is **Anyone**
+   (Deploy → Manage deployments → ✏️ → Who has access).
 
-`doPost` then receives the same batches. The page sends `text/plain`, which is a
-"simple" CORS request, so the browser skips the preflight that Apps Script
-cannot answer.
+`doPost` receives the same batches `ingest` does. The page sends `text/plain`,
+which is a "simple" CORS request, so the browser skips the preflight Apps Script
+cannot answer. Apps Script answers a POST with a 302 to
+`script.googleusercontent.com`; `fetch` follows it and both hops send
+`Access-Control-Allow-Origin: *`.
+
+**The `/exec` URL is tied to the deployment, not the project.** Creating a *new*
+deployment mints a new URL and the old one goes stale, so `config.js` must be
+updated and pushed. Use **Manage deployments → ✏️ → New version** to keep the
+same URL.
 
 **What "Anyone" costs.** The URL becomes a public write endpoint that runs as
 you: anyone who finds it can append rows and consume your Google quota. Payloads

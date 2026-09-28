@@ -52,7 +52,7 @@ Works on phone and desktop, and offline after the first load.
 │   ├── data/                 config, default save, level and economy tables
 │   └── export-data.js        regenerates data/ from the game code
 ├── google/                   optional Google Sheets logging (Apps Script)
-│   ├── collector.gs          the collector; setup_, doGet, ingest
+│   ├── collector.gs          the collector; setup, doGet, doPost, ingest
 │   ├── build.js              bundles the game into INSTALL.gs
 │   └── README.md             setup steps
 ├── ev_check.py               verifies the multiplier curve
@@ -83,7 +83,7 @@ python3 ev_check.py                  # multiplier curve vs the real streak proba
 Both must pass after any change to `config.js`.
 
 ```sh
-node google/collector.test.js   # 8 checks for the Sheets collector
+node google/collector.test.js   # 10 checks for the Sheets collector
 ```
 
 ---
@@ -119,9 +119,11 @@ whole repository instead.
   league placement pays nothing until real opponents exist.
 - **Saves can be edited** in browser DevTools, so nothing here is suitable for
   prizes.
-- **No data is collected** by the hosted game. Analytics are queued locally and
-  never sent. Deploying the optional [Apps Script build](google/README.md) sends
-  them to a Google Sheet you own.
+- **Gameplay analytics are recorded.** The hosted game posts events to a Google
+  Sheet owned by the developer: a generated browser id, your chosen display name
+  and gameplay events — no email, contacts or payment data. Clear
+  `TELEMETRY.endpoint` in `config.js` to turn it off; the queue then stays local
+  and export-only. See [`google/README.md`](google/README.md).
 
 See [`context/CONTEXT.md`](context/CONTEXT.md) for the full rules, economy
 maths, data format and change history.

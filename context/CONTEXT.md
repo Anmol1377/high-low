@@ -3,7 +3,7 @@
 Everything needed to pick this project up cold: what the game is, how it works,
 where the data lives, what was changed from the original design, and why.
 
-Last updated: 17 September 2026 · Build `2.4.0` · GDD `v2.3`
+Last updated: 29 September 2026 · Build `2.4.1` · GDD `v2.3`
 
 ---
 
@@ -180,15 +180,17 @@ mid-reveal, the reveal finishes first, then the run settles.
 
 ## 7. Data storage
 
-**Everything lives in the browser. Nothing is sent to a server** —
-`CONFIG.TELEMETRY.endpoint` is empty.
+**All game state lives in the browser.** The save, progress and leaderboards
+never leave it and are never read back from anywhere. Gameplay *events* are the
+exception: `CONFIG.TELEMETRY.endpoint` is set, so the queue below is also POSTed
+to the Apps Script collector and appended to a Google Sheet (§7.3).
 
 | What | Where | Key |
 |---|---|---|
 | Player save | `localStorage` | `high-low-casino-save-v1` |
 | Anonymous player ID | `localStorage` | `hlc-player-id` |
 | Analytics queue | IndexedDB → `localStorage` (500 cap) → memory | DB `hlc-telemetry`, store `outbox` / key `hlc-outbox-v1` |
-| Offline app files | Service worker cache | `hlc-v2.4.0` |
+| Offline app files | Service worker cache | `hlc-v2.4.1` |
 
 ### 7.1 The save
 
@@ -387,4 +389,6 @@ native image sharing, and install-to-home-screen.
 | **Leaderboards and leagues stay per-browser** | Hosting does not make them shared. League placement payouts stay off because there are no real rivals on a local board. |
 | **Casino theme** | Fine while it is virtual chips only. Before adding purchases or anything with real-world value, check GitHub's terms and local rules. |
 | **Saves are editable** | Anyone can read and change their save in browser DevTools. Fine for a free game; not for prizes or anything competitive. |
-| **No data collection** | `CONFIG.TELEMETRY.endpoint` is empty, so nothing is sent anywhere. Setting it later means adding a privacy notice first. |
+| **Analytics are collected** | `CONFIG.TELEMETRY.endpoint` points at the Apps Script `/exec` URL, so gameplay events go to a Google Sheet: a generated browser id, the chosen display name and gameplay events — no email, contacts or payment data. Players should be told. Clearing the endpoint reverts to a local, export-only queue. |
+| **The collector is an open write endpoint** | Deployment access is "Anyone", so the URL runs as the owner for anybody who finds it. Payloads are size-checked, shape-checked and formula-escaped, but there is no authentication and no rate limiting. Fine for a test audience; a real launch needs a proper backend. |
+| **`/exec` URLs are per-deployment** | A *new* deployment mints a new URL and strands the old one. Use "Manage deployments → New version" to keep it stable, or `config.js` must be updated and pushed. |
