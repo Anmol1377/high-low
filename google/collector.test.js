@@ -38,10 +38,12 @@ const ctx = {
     getProperty: k => props[k] || null, setProperty: (k, v) => props[k] = v})},
   LockService: {getScriptLock: () => ({tryLock: () => true, releaseLock() {}})},
   HtmlService: {}, Utilities: {}, ScriptApp: {}, console,
+  ContentService: {MimeType: {JSON: "json"},
+    createTextOutput: t => ({__text: t, setMimeType() { return this; }})},
   Array, JSON, Date, Number, String, Object, Error, isFinite, RegExp
 };
 const src = fs.readFileSync(path.join(__dirname, "collector.gs"), "utf8");
-new Function(...Object.keys(ctx), src + "\nthis.__api = {setup, ingest, validate_, cell_};")
+new Function(...Object.keys(ctx), src + "\nthis.__api = {setup, ingest, validate_, cell_}; this.__doPost = doPost;")
   .call(ctx, ...Object.values(ctx));
 const {setup, ingest, validate_, cell_} = ctx.__api;
 
@@ -116,5 +118,18 @@ ok("each event type lands on its own tab", () => {
                     rec(12, {tab: "errors", event: "save_error"})]});
   assert.strictEqual(book._sheets.economy.rows.length, 2);
   assert.strictEqual(book._sheets.errors.rows.length, 2);
+});
+/* ---- doPost: the cross-origin path used by the GitHub Pages copy ---- */
+const {doPost} = ctx.__api2 || {};
+ok("doPost stores a valid batch and returns the accepted ids", () => {
+  const r = rec(20, {tab: "predictions", event: "prediction_resolved"});
+  const out = JSON.parse(ctx.__doPost({postData: {contents: JSON.stringify({records: [r]})}}).__text);
+  assert.deepStrictEqual(out.accepted, [r.id]);
+  assert.strictEqual(idsOf(book._sheets.predictions).filter(x => x === r.id).length, 1);
+});
+ok("doPost reports bad input as an error instead of throwing", () => {
+  const out = JSON.parse(ctx.__doPost({postData: {contents: "not json"}}).__text);
+  assert.deepStrictEqual(out.accepted, []);
+  assert(out.error, "expected an error message");
 });
 console.log(`\n${pass} collector checks passed.\n`);

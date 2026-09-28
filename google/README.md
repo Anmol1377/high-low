@@ -58,6 +58,26 @@ completely, the spreadsheet URL, which tabs exist, and the deployed URL.
 instead of Google's generic page. **Any change needs a new deployment version** —
 saving the editor alone does not update a live `/exec` URL.
 
+## Recording from the hosted (GitHub Pages) game
+
+By default only the Apps Script copy logs, because it can call `ingest` through
+`google.script.run`. To log from `anmol1377.github.io/high-low/` as well:
+
+1. `CONFIG.TELEMETRY.endpoint` in `high-low-casino/config.js` holds this
+   deployment's `/exec` URL (already set).
+2. The deployment's access must be **Anyone**:
+   Deploy → Manage deployments → ✏️ → Who has access: **Anyone** → Deploy.
+
+`doPost` then receives the same batches. The page sends `text/plain`, which is a
+"simple" CORS request, so the browser skips the preflight that Apps Script
+cannot answer.
+
+**What "Anyone" costs.** The URL becomes a public write endpoint that runs as
+you: anyone who finds it can append rows and consume your Google quota. Payloads
+are size- and shape-checked and formula-escaped, but there is no authentication
+and no rate limiting. Fine for a test audience; not for a public launch. Revert
+by setting access back to "Only myself" and clearing `endpoint`.
+
 ## Updating the game later
 
 ```sh

@@ -117,6 +117,27 @@ function debugInfo() {
   return report;
 }
 
+/**
+ * Cross-origin entry point, so the GitHub Pages copy of the game can log to the
+ * same spreadsheet. The page posts text/plain, which is a "simple" request and
+ * therefore skips the CORS preflight Apps Script cannot answer.
+ *
+ * This only works when the deployment's access is "Anyone", which makes the URL
+ * a public write endpoint running as the owner, with validation but no
+ * authentication and no rate limiting. Keep it to a test audience.
+ */
+function doPost(e) {
+  let out;
+  try {
+    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    out = ingest(body);
+  } catch (err) {
+    out = {accepted: [], error: String(err && err.message || err)};
+  }
+  return ContentService.createTextOutput(JSON.stringify(out))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 /** Reject anything malformed before it can reach a sheet. */
 function validate_(records) {
   if (!Array.isArray(records) || !records.length || records.length > 20) {

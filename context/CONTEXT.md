@@ -3,7 +3,7 @@
 Everything needed to pick this project up cold: what the game is, how it works,
 where the data lives, what was changed from the original design, and why.
 
-Last updated: 17 September 2026 · Build `2.3.3` · GDD `v2.3`
+Last updated: 17 September 2026 · Build `2.4.0` · GDD `v2.3`
 
 ---
 
@@ -188,7 +188,7 @@ mid-reveal, the reveal finishes first, then the run settles.
 | Player save | `localStorage` | `high-low-casino-save-v1` |
 | Anonymous player ID | `localStorage` | `hlc-player-id` |
 | Analytics queue | IndexedDB → `localStorage` (500 cap) → memory | DB `hlc-telemetry`, store `outbox` / key `hlc-outbox-v1` |
-| Offline app files | Service worker cache | `hlc-v2.3.3` |
+| Offline app files | Service worker cache | `hlc-v2.4.0` |
 
 ### 7.1 The save
 
@@ -334,7 +334,7 @@ gameplay input.
 | No backend | Scores, leagues, challenges and the wallet are client-authoritative. Nothing competitive can carry value until Phase 3. |
 | Device clock | All time-based rewards can be gamed by changing the clock. |
 | No run resume | Closing mid-run abandons it; the wager stays spent. |
-| Telemetry upload | Ordinary hosting queues and exports only. `google/` bundles the game for Apps Script, where it uploads to Sheets through `google.script.run` — see `google/README.md`. |
+| Telemetry upload | Apps Script copy uploads via `google.script.run`; the hosted copy posts to the same `/exec` URL via `doPost` (needs deployment access "Anyone", which makes it a public write endpoint). See `google/README.md`. |
 | Sound / haptics | Settings toggles exist; no audio or haptic output is implemented. |
 
 ---
